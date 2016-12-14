@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "714204703996",
+    "firebase_url": "https://ebuycamer.firebaseio.com",
+    "project_id": "ebuycamer",
+    "storage_bucket": "ebuycamer.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:714204703996:android:079e1d96053cfa9f",
+        "android_client_info": {
+          "package_name": "com.bricenangue.nextgeneration.ebuycamer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "714204703996-ka61pf3h9o0cp81s9rednto6popqmj4c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bricenangue.nextgeneration.ebuycamer",
+            "certificate_hash": "881B425908AACFFF27E4C3EAC32663F5DE08D1D9"
+          }
+        },
+        {
+          "client_id": "714204703996-r85k4rieskno9ivvah7sijaqdusrl6p5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATkEW0G1pW1lFpbuF5H6AfntmgmWqCTHo"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "714204703996-r85k4rieskno9ivvah7sijaqdusrl6p5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

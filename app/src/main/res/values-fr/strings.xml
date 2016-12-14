@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="currency_xaf">FCFA</string>
+    <string name="currency_usd">DOLLAR</string>
+    <string name="currency_gbp">LIVRE</string>
+    <string name="currency_euro">EURO</string>
+    <string name="categories_prompt">Choisissez un pays</string>
+    <string name="categories_post_sport_leisure">Sport, Loisirs et Jeux</string>
+    <string name="categories_post_services">Services</string>
+    <string name="categories_post_pets_accessoire">Animaux et Accéssoires</string>
+    <string name="categories_post_others">Autres</string>
+    <string name="categories_post_movies_books">Filmes, Livres et Musique</string>
+    <string name="categories_post_home_garden">Maison et Jardin</string>
+    <string name="categories_post_fashion_accessoire">Mode et Accéssoires</string>
+    <string name="categories_post_electronic">Électronique</string>
+    <string name="categories_post_cars_and_motors">Voitures et Moteurs</string>
+    <string name="categories_post_baby_child">Bébé et Enfant</string>
+    <string name="button_remove_from_favorite_cardview">Supprimer des favoris</string>
+    <string name="button_promote_mypost_cardview">Promouvoir</string>
+    <string name="alertDialogverifyemail">Vérifiez votre e-mail adrèsse en cliquant sur le lien envoyé à s\'il vous plait.</string>
+    <string name="error_field_required_price">Fixez un prix</string>
+    <string name="error_field_required_title">Que vends tu?</string>
+    <string name="maimpage_alertdialog_button_confirm_name">Suivant</string>
+    <string name="maimpage_alertdialog_button_request_mail">Reenvoyer un e-mail de vérification</string>
+    <string name="maimpage_alertdialog_edittext_error_empty">Cet espace est obligatoire.</string>
+    <string name="mainpage_alertdialog_signin_email_set_name">Choisissez votre nom d\'utilisateur</string>
+    <string name="mainpage_alertdialog_signin_request_false">Une erreur survenue pendant l\'enregistrement. Recommencer l\'action s\'il vous plait</string>
+    <string name="mainpage_error_while_loading_data">Une erreur est survenue lors du téléchargement des données.</string>
+    <string name="mainpage_no_item_at_location">Il n\'y a aucun objet en vente dans cette ville présentement. Essayez une ville voisine!</string>
+    <string name="mainpage_toast_loggingAs">Vous êtes connecté en tant que</string>
+    <string name="password_provider_id">Mot de passe</string>
+    <string name="pick_image_intent_text">Choisissez une image</string>
+    <string name="pref_description_social_recommendations">Recommandation des personnes à contacter</string>
+    <string name="pref_header_data_sync">Donnés et amp; synchroniser</string>
+    <string name="pref_header_general">Générale</string>
+    <string name="pref_header_notifications">Notifications</string>
+    <string name="pref_ringtone_silent">Silencieux</string>
+    <string name="pref_title_add_friends_to_messages">Ajouter des amis aux méssages</string>
+    <string name="pref_title_display_name">Afficher le nom</string>
+    <string name="pref_title_new_message_notifications">Nouvelle notification</string>
+    <string name="pref_title_ringtone">Sonnerie</string>
+    <string name="pref_title_social_recommendations">Activer la recommandation sociale</string>
+    <string name="string_toast_text_error">Erreur</string>
+    <string name="string_toast_text_error_city">Erreur survenue lors d\'une  modification dans le fichier _VILLES</string>
+    <string name="string_toast_text_success">Succès</string>
+    <string name="string_toast_viewcontent_Post_deleted">Cette publication a été supprimé par le créateur</string>
+    <string name="string_viewcontent_button_call">Appeler</string>
+    <string name="string_viewcontent_button_email">E-mail</string>
+    <string name="string_viewcontent_category_name">Catégorie</string>
+    <string name="string_viewcontent_error_post_null">Erreur. Publication vide</string>
+    <string name="title_activity_settings">Paramètres</string>
+    <string name="action_location">Position actuelle</string>
+    <string name="action_location_add_new">Ajouter une Ville</string>
+    <string name="action_logout">Déconnexion</string>
+    <string name="action_mark_as_favorite">Marquer</string>
+    <string name="action_play">Jouer la vidéo</string>
+    <string name="action_record">Enrégistrer la vidéo</string>
+    <string name="action_save">Sauvegarder</string>
+    <string name="action_search">Recherche</string>
+    <string name="action_settings">Paramètres</string>
+    <string name="activity_category">Catégories</string>
+    <string name="activity_myfavorite">Mes Favoris</string>
+    <string name="activity_mypost">Mes Publications</string>
+    <string name="activity_name_location">Villes</string>
+    <string name="hello_world">Hallo Monde!</string>
+    <string name="pref_title_vibrate">Vibration</string>
+    <string name="string_create_new_publication_spinner_category_default">Choisissez une catégorie</string>
+    <string name="string_toast_text_deleted">Supprimé</string>
+    <string name="string_toast_text_error_user">Erreur survenue lors d\'une modification dans le fichier _UTILISATEUR</string>
+    <string name="username_hint">Nom de l\'utilisateur</string>
+    <string name="viewcontent_user_numberof_Ads">Publications en ligne</string>
+    <string name="pref_title_system_sync_settings">Synchroniser les paramètres du systeme</string>
+    <string name="pref_title_sync_frequency">Synchroniser la fréquence</string>
+    <string name="action_label">Ajouter un label</string>
+
+    // for paths in firebase (all in english)
+
+    <array name="categories_arrays_create">
+        <item>Electronics</item>
+        <item>Cars and Motors</item>
+        <item>Fashion and Accessories</item>
+        <item>Baby and Child</item>
+        <item>Sport, Leisure and Games</item>
+        <item>Services</item>
+        <item>Home and Garden</item>
+        <item>Movies, Books and Music</item>
+        <item>Pets and Accessories</item>
+        <item>Others</item>
+    </array>
+
+
+
+    <array name="currency">
+        <item>FCFA</item>
+        <item>EURO</item>
+        <item>DOLLAR</item>
+        <item>LIVRE</item>
+
+    </array>
+
+
+    <array name="categories_array_mainpage">
+        <item>Nouveau dans ta ville</item>
+        <item>Électronique</item>
+        <item>Voitures et Moteurs</item>
+        <item>Mode et Accéssoires</item>
+        <item>Bébé et Enfant</item>
+        <item>Sport, Loisirs et Jeux</item>
+        <item>Services</item>
+        <item>Maison et Jardin</item>
+        <item>Filmes, Livres et Musique</item>
+        <item>Animaux et Accéssoires</item>
+        <item>Autres</item>
+    </array>
+
+
+
+
+
+    <array name="categories_array_activity">
+        <item>Électronique</item>
+        <item>Voitures et Moteurs</item>
+        <item>Mode et Accéssoires</item>
+        <item>Bébé et Enfant</item>
+        <item>Sport, Loisirs et Jeux</item>
+        <item>Services</item>
+        <item>Maison et Jardin</item>
+        <item>Filmes, Livres et Musique</item>
+        <item>Animaux et Accéssoires</item>
+        <item>Autres</item>
+    </array>
+
+
+    <string-array name="locations_array_activity">
+        <item>Yaoundé</item>
+        <item>Douala</item>
+        <item>Garoua</item>
+        <item>Bamenda</item>
+        <item>Maroua</item>
+        <item>Nkongsamba</item>
+        <item>Bafoussam</item>
+        <item>Ngaoundéré</item>
+        <item>Bertoua</item>
+        <item>Loum</item>
+        <item>Kumba</item>
+        <item>Edéa</item>
+        <item>Kumbo</item>
+        <item>Foumban</item>
+        <item>Dschang</item>
+        <item>Mbouda</item>
+        <item>Limbé</item>
+        <item>Ebolowa</item>
+        <item>Bafang</item>
+        <item>Bafia</item>
+        <item>Bangangté</item>
+        <item>Obala</item>
+        <item>Manfé</item>
+        <item>Banyo</item>
+        <item>Bantouri</item>
+        <item>Melong</item>
+        <item>Makénéné</item>
+        <item>Yabassi</item>
+    </string-array>
+    <string name="button_toolbar_favorite">Mes Favoris</string>
+    <string name="button_toolbar_my_Ads">Publications</string>
+    <string name="button_toolbar_my_favorite">Favoris</string>
+    <string name="button_toolbar_sell">Vendre</string>
+    <string name="button_toolbar_settings">Réglages</string>
+    <string name="fav_cardview_location">Ville</string>
+    <string name="create_post_button_text_sale_now">Vendre</string>
+    <string name="create_post_hint_categroy">Catégorie</string>
+    <string name="create_post_hint_description">Décrivez votre marchandise</string>
+    <string name="create_post_hint_price">Prix</string>
+    <string name="create_post_hint_title">Qu\'est ce que vous vendez?</string>
+    <string name="action_share_viewcontent">Partager</string>
+    <string name="send_to">Partager la publication via</string>
+    <string name="string_toast_text_sharing_unavialable">Vous ne pouvez pas partager cette publication</string>
+    <string name="action_user_profile">Mon Profile</string>
+    <string name="button_userprofile_save">Sauvegarder</string>
+    <string name="userprofile_hint_edit">Modifier</string>
+    <string name="userprofile_hint_edit_location">Changer de ville</string>
+    <string name="userprofile_hint_email">E-Mail</string>
+    <string name="userprofile_hint_location">Ville actuèlle</string>
+    <string name="userprofile_hint_numberOfAds">Nombre de publication en ligne</string>
+    <string name="alertDialoglogout">Déconnecter cette séssion?</string>
+    <string name="button_cancel">Annuler</string>
+    <string name="button_logout">Déconnecter</string>
+
+</resources>

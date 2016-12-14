@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:add="http://schemas.android.com/tools">
+
+    <item android:id="@+id/action_menu_new"
+        app:showAsAction="ifRoom"
+        android:title="New Post"
+        android:icon="@drawable/ic_add_a_photo_white_48dp"/>
+    <item android:id="@+id/action_menu_my_favorites"
+        app:showAsAction="ifRoom"
+        android:title="Favorites"
+        android:icon="@drawable/ic_grade_white_48dp"/>
+    <item android:id="@+id/action_settings"
+        app:showAsAction="ifRoom"
+        android:title="Redo"
+        android:icon="@drawable/ic_settings_white_48dp"/>
+    <item android:id="@+id/menu_share4"
+        add:showAsAction="ifRoom"
+        android:title="Save" />
+</menu>

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:paddingTop="10dp"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/linearLayout_viewcontent_title_price"
+        android:layout_alignParentTop="true"
+        android:layout_marginBottom="15dp">
+
+        <TextView
+            android:text="TextView_title_that is really long and we wanna fit it in how do we do thta "
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView5"
+            android:layout_weight="2"
+            android:maxLines="3"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:text="200,000,000 €"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView4"
+            android:layout_weight="1"
+            android:layout_gravity="end"
+            android:gravity="end|center_vertical"/>
+    </LinearLayout>
+
+    <Button
+        android:text="Yaoundé"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/textView_viewcontent_location"
+        android:layout_below="@+id/linearLayout_viewcontent_title_price"
+        android:layout_marginBottom="15dp"
+        style="@style/Base.Widget.AppCompat.Button.Borderless"
+        android:drawableLeft="@drawable/ic_place_black_18dp"
+        android:textAllCaps="false"
+        android:gravity="start|center_vertical"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/linearLayout_viewcontent_categorie"
+        android:layout_below="@+id/textView_viewcontent_location"
+        android:layout_marginBottom="5dp">
+
+        <TextView
+            android:text="Category"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView"
+            android:layout_weight="1"
+            android:layout_gravity="start"/>
+
+        <TextView
+            android:text="Baby and accessories"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView2"
+            android:layout_weight="2"
+            android:maxLines="1"
+            android:gravity="end"/>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/authui_colorAccent"
+        android:layout_below="@+id/linearLayout_viewcontent_categorie"
+        android:layout_marginBottom="5dp"
+        android:id="@+id/view_viewcontent_separator"
+        android:alpha="0.4"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:id="@+id/linearLayout_viewcontent_time_viewer_description"
+        android:layout_below="@+id/view_viewcontent_separator">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/view_viewcontent_description"
+            android:text="this is a sample text which
+            is very long to test how long should a description
+            be so tha it fits and how would the other compoents
+            behave acording now jus bullshit writngi and lalalala  et voila"
+            android:layout_margin="2dp"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:id="@+id/linearLayout_viewcontent_time_viewer"
+            >
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Today, 14:32"
+                android:layout_weight="1"
+                android:layout_gravity="start"
+                android:gravity="start|center_vertical"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:textAllCaps="false"
+                android:drawableLeft="@drawable/ic_access_time_black_18dp"
+                android:enabled="false"
+                android:clickable="false"/>
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="567"
+                android:textAlignment="viewEnd"
+                android:layout_gravity="end"
+                android:gravity="end|center_vertical"
+                android:drawableLeft="@drawable/ic_remove_red_eye_black_18dp"
+                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                android:padding="5dp"
+                android:enabled="false"
+                android:clickable="false"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/authui_colorAccent"
+        android:layout_below="@+id/linearLayout_viewcontent_time_viewer_description"
+        android:layout_marginBottom="5dp"
+        android:id="@+id/view_viewcontent_separator_time_viewer"
+        android:alpha="0.2"/>
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/relative_layout_viewpager_viewcontent_user_profile"
+        android:layout_below="@+id/view_viewcontent_separator_time_viewer">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/ic_launcher"
+                android:layout_marginLeft="5dp"
+                android:scaleType="centerInside"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_weight="2"
+                android:layout_gravity="end"
+                android:gravity="start"
+               android:layout_marginLeft="10dp" >
+
+                <TextView
+                    android:text="Display name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView6"
+                    android:layout_weight="1"
+                    android:textStyle="bold"
+
+                    />
+
+                <TextView
+                    android:text="private seller"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView7"
+                   android:layout_weight="1"/>
+
+                <TextView
+                    android:text="12 Adsd online"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView8"
+                    android:layout_weight="1"/>
+
+            </LinearLayout>
+        </LinearLayout>
+
+    </RelativeLayout>
+</RelativeLayout>

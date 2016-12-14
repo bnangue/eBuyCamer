@@ -1,3 +1,260 @@
 <resources>
-    <string name="app_name">EBUYCAMER</string>
+    <string name="app_name" translatable="false">Bizness Camer</string>
+    <string name="activity_name_location">Regions</string>
+    <string name="activity_category">Categories</string>
+    <string name="activity_mypost">My Ads</string>
+    <string name="activity_myfavorite">My favorites</string>
+    <string name="facebook_application_id" translatable="false">1007941252650277</string>
+    <string name="facebook_login_protocol_scheme" translatable="false">fb1007941252650277</string>
+    <string name="facebook_provider_id" translatable="false">facebook.com</string>
+    <string name="password_provider_id">password</string>
+    password
+
+    <string name="action_settings">Settings</string>
+    <string name="action_search">Search</string>
+    <string name="action_record">Record Video</string>
+    <string name="action_save">Save</string>
+    <string name="action_label">Add Label</string>
+    <string name="action_play">Play Video</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_logout">Logout</string>
+    <string name="pick_image_intent_text">Select a picture</string>
+    <string name="error_field_required_title">Tell us what you are selling</string>
+    <string name="error_field_required_price">set a price</string>
+
+
+    <string name="categories_prompt">Choose a country</string>
+    <string name="action_location">Location</string>
+    <string name="action_location_add_new">Add a new Location</string>
+    <string name="string_viewcontent_category_name">Category</string>
+    <string name="string_viewcontent_button_email">E-mail</string>
+    <string name="string_viewcontent_button_call">Call</string>
+    <string name="mainpage_alertdialog_signin_request_false">Error while signing up. Please try again</string>
+    <string name="mainpage_alertdialog_signin_email_set_name">Set a username</string>
+    <string name="maimpage_alertdialog_button_confirm_name">Next</string>
+    <string name="username_hint">Username</string>
+    <string name="maimpage_alertdialog_edittext_error_empty">This field cannot be empty</string>
+    <string name="string_create_new_publication_spinner_category_default">Select a category</string>
+    <string name="string_toast_text_success">Success</string>
+    <string name="string_toast_text_error">Error</string>
+    <string name="mainpage_toast_loggingAs">Successfully logged in as</string>
+    <string name="button_promote_mypost_cardview">Promote</string>
+    <string name="string_toast_text_deleted">deleted</string>
+    <string name="action_mark_as_favorite">Mark</string>
+    <string name="button_remove_from_favorite_cardview">Remove from Favorites</string>
+    <string name="string_toast_viewcontent_Post_deleted">This post has been deleted</string>
+    <string name="maimpage_alertdialog_button_request_mail">Request email verification</string>
+
+    // for paths in firebase (all in english)
+    <array name="categories_arrays_create">
+        <item>Electronics</item>
+        <item>Cars and Motors</item>
+        <item>Fashion and Accessories</item>
+        <item>Baby and Child</item>
+        <item>Sport, Leisure and Games</item>
+        <item>Services</item>
+        <item>Home and Garden</item>
+        <item>Movies, Books and Music</item>
+        <item>Pets and Accessories</item>
+        <item>Others</item>
+    </array>
+
+
+    // categories
+
+    <string name="categories_post_electronic">Electronics</string>
+    <string name="categories_post_cars_and_motors">Cars and Motors</string>
+    <string name="categories_post_fashion_accessoire">Fashion and Accessories</string>
+    <string name="categories_post_baby_child">Baby and Child</string>
+    <string name="categories_post_sport_leisure">Sport, Leisure and Games</string>
+    <string name="categories_post_services">Services</string>
+    <string name="categories_post_home_garden">Home and Garden</string>
+    <string name="categories_post_movies_books">Movies, Books and Music</string>
+    <string name="categories_post_pets_accessoire">Pets and Accessories</string>
+    <string name="categories_post_others">Others</string>
+
+    <array name="currency">
+        <item>XAF</item>
+        <item>EUR</item>
+        <item>USD</item>
+        <item>GBP</item>
+
+    </array>
+
+    // currency
+    <string name="currency_xaf">XAF</string>
+    <string name="currency_euro">EUR</string>
+    <string name="currency_usd">USD</string>
+    <string name="currency_gbp">GBP</string>
+
+
+    <array name="toolbar_spinner">
+        <item>XAF</item>
+        <item>EUR</item>
+    </array>
+
+    <array name="categories_array_mainpage">
+        <item>New in your area</item>
+        <item>Electronics</item>
+        <item>Cars and Motors</item>
+        <item>Fashion and Accessories</item>
+        <item>Baby and Child</item>
+        <item>Sport, Leisure and Games</item>
+        <item>Services</item>
+        <item>Home and Garden</item>
+        <item>Movies, Books and Music</item>
+        <item>Pets and Accessories</item>
+        <item>Others</item>
+    </array>
+
+
+    <array name="categories_array_activity">
+        <item>Electronics</item>
+        <item>Cars and Motors</item>
+        <item>Fashion and Accessories</item>
+        <item>Baby and Child</item>
+        <item>Sport, Leisure and Games</item>
+        <item>Services</item>
+        <item>Home and Garden</item>
+        <item>Movies, Books and Music</item>
+        <item>Pets and Accessories</item>
+        <item>Others</item>
+    </array>
+
+
+    <string-array name="locations_array_activity">
+        <item>Yaoundé</item>
+        <item>Douala</item>
+        <item>Garoua</item>
+        <item>Bamenda</item>
+        <item>Maroua</item>
+        <item>Nkongsamba</item>
+        <item>Bafoussam</item>
+        <item>Ngaoundéré</item>
+        <item>Bertoua</item>
+        <item>Loum</item>
+        <item>Kumba</item>
+        <item>Edéa</item>
+        <item>Kumbo</item>
+        <item>Foumban</item>
+        <item>Dschang</item>
+        <item>Mbouda</item>
+        <item>Limbé</item>
+        <item>Ebolowa</item>
+        <item>Bafang</item>
+        <item>Bafia</item>
+        <item>Bangangté</item>
+        <item>Obala</item>
+        <item>Manfé</item>
+        <item>Banyo</item>
+        <item>Bantouri</item>
+        <item>Melong</item>
+        <item>Makénéné</item>
+        <item>Yabassi</item>
+    </string-array>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+    <string name="pref_header_general">General</string>
+
+    <string name="pref_title_social_recommendations">Enable social recommendations</string>
+    <string name="pref_description_social_recommendations">Recommendations for people to contact
+        based on your message history
+    </string>
+
+    <string name="pref_title_display_name">Display name</string>
+    <string name="pref_default_display_name" translatable="false">John Smith</string>
+
+    <string name="pref_title_add_friends_to_messages">Add friends to messages</string>
+    <string-array name="pref_example_list_titles">
+        <item>Always</item>
+        <item>When possible</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_example_list_values">
+        <item>1</item>
+        <item>0</item>
+        <item>-1</item>
+    </string-array>
+
+    <!-- Example settings for Data & Sync -->
+    <string name="pref_header_data_sync">Data &amp; sync</string>
+
+    <string name="pref_title_sync_frequency">Sync frequency</string>
+    <string-array name="pref_sync_frequency_titles">
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>6 hours</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_sync_frequency_values">
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>180</item>
+        <item>360</item>
+        <item>-1</item>
+    </string-array>
+
+    <string-array name="list_preference_entries">
+        <item>Entry 1</item>
+        <item>Entry 2</item>
+        <item>Entry 3</item>
+    </string-array>
+
+    <string-array name="list_preference_entry_values">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="multi_select_list_preference_default_value" />
+
+    <string name="pref_title_system_sync_settings">System sync settings</string>
+
+    <!-- Example settings for Notifications -->
+    <string name="pref_header_notifications">Notifications</string>
+
+    <string name="pref_title_new_message_notifications">New message notifications</string>
+
+    <string name="pref_title_ringtone">Ringtone</string>
+    <string name="pref_ringtone_silent">Silent</string>
+
+    <string name="pref_title_vibrate">Vibrate</string>
+    <string name="string_toast_text_error_city">Error editing post in city folder</string>
+    <string name="string_toast_text_error_user">Error editing post in user folder</string>
+    <string name="alertDialogverifyemail">Please verify your e-mail address by clicking on the link send at</string>
+    <string name="mainpage_no_item_at_location">currently no item for sale in this location. try a location around</string>
+    <string name="mainpage_error_while_loading_data">An Error occure while loading data</string>
+    <string name="string_viewcontent_error_post_null">Error publication empty</string>
+    <string name="viewcontent_user_numberof_Ads">Ads online</string>
+    <string name="button_toolbar_sell">Sell</string>
+    <string name="button_toolbar_favorite">My Favorites</string>
+    <string name="button_toolbar_my_Ads">My Ads</string>
+    <string name="button_toolbar_my_favorite">Favorites</string>
+    <string name="button_toolbar_settings">Settings</string>
+    <string name="fav_cardview_location">Location</string>
+    <string name="create_post_hint_title">What are you selling?</string>
+    <string name="create_post_hint_description">Describe it (optional)</string>
+    <string name="create_post_hint_price">Price</string>
+    <string name="create_post_hint_categroy">Category</string>
+    <string name="create_post_button_text_sale_now">Sell Now</string>
+    <string name="action_share_viewcontent">Share</string>
+    <string name="send_to">Share publication via</string>
+    <string name="string_toast_text_sharing_unavialable">You cannot share this publication</string>
+    <string name="userprofile_hint_email">E-Mail</string>
+    <string name="userprofile_hint_edit">Edit</string>
+    <string name="userprofile_hint_location">Current location</string>
+    <string name="userprofile_hint_edit_location">Change location</string>
+    <string name="userprofile_hint_numberOfAds">Number of ads online</string>
+    <string name="button_userprofile_save">Save picture</string>
+    <string name="action_user_profile">My Profile</string>
+    <string name="alertDialoglogout">Log out from this Session?</string>
+    <string name="button_cancel">Cancel</string>
+    <string name="button_logout">Log out</string>
+
 </resources>

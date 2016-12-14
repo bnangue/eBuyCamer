@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_main_page"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.bricenangue.nextgeneration.ebuycamer.MainPageActivity">
+
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@android:style/ThemeOverlay.Material.Dark.ActionBar"
+        android:popupTheme="@android:style/ThemeOverlay.Material.Light">
+
+
+    </android.support.v7.widget.Toolbar>
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/toolbar_bottom"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:background="@color/colorAccent"
+        android:gravity="center"
+        android:minHeight="?attr/actionBarSize"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:foregroundGravity="left">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:orientation="horizontal"
+            android:gravity="left|bottom"
+            android:layout_gravity="left|bottom"
+            android:minHeight="?attr/actionBarSize"
+            android:foregroundGravity="left">
+
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_add_a_photo_white_18dp"
+                android:id="@+id/button_create_new_post"
+                android:text="@string/button_toolbar_sell"
+                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                android:textSize="10sp"
+                android:textColor="@color/white"
+                android:textAllCaps="false"
+                android:layout_gravity="start|bottom"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_grade_white_18dp"
+                android:id="@+id/button_view_favorite"
+                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                android:textSize="10sp"
+                android:textColor="@color/white"
+                android:textAllCaps="false"
+                android:layout_gravity="start|bottom"
+                android:text="@string/button_toolbar_my_favorite"
+                />
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_folder_white_18dp"
+                android:id="@+id/button_view_my_post"
+                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                android:textColor="@color/white"
+                android:layout_gravity="start|bottom"
+                android:text="@string/button_toolbar_my_Ads"
+                android:textAllCaps="false"
+                android:textSize="10sp"/>
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableTop="@drawable/ic_settings_white_18dp"
+                android:id="@+id/button_go_to_setting"
+                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                android:textColor="@color/white"
+                android:textAllCaps="false"
+                android:layout_gravity="start|top"
+                android:text="@string/button_toolbar_settings"
+                android:textSize="10sp"
+                />
+
+        </LinearLayout>
+
+    </android.support.v7.widget.Toolbar>
+
+
+    <LinearLayout
+        android:layout_below="@+id/toolbar"
+        android:layout_above="@+id/toolbar_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+        <android.support.v7.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/recyclerview_mainpage">
+
+        </android.support.v7.widget.RecyclerView>
+    </LinearLayout>
+</RelativeLayout>

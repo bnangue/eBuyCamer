@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_create_and_modify_publication"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.bricenangue.nextgeneration.ebuycamer.CreateAndModifyPublicationActivity">
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:orientation="horizontal"
+        android:layout_alignParentTop="true"
+        android:id="@+id/linearLayout_image_post"
+        android:layout_marginBottom="10dp"
+        >
+
+        <ImageView
+            android:id="@+id/imageView_Choose_Image_post"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+            android:src="@drawable/ic_add_a_photo_black_48dp"
+            android:layout_gravity="center|end"
+           />
+
+        <org.lucasr.twowayview.TwoWayView
+            android:id="@+id/lvItems"
+            style="@style/TwoWayView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:drawSelectorOnTop="true"
+            android:layout_marginTop="5dp"
+            />
+
+    </LinearLayout>
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText_layout_title_post"
+        android:layout_marginBottom="10dp"
+        android:layout_below="@+id/linearLayout_image_post">
+        <EditText
+            android:id="@+id/editText_title_post"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:ems="10"
+            android:hint="@string/create_post_hint_title"
+            />
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText_layout_description_post"
+        android:layout_below="@+id/editText_layout_title_post"
+        app:counterEnabled="true"
+        app:counterMaxLength="500">
+        <EditText
+            android:id="@+id/editText_description_post"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:inputType="text"
+            android:ems="10"
+            android:hint="@string/create_post_hint_description"
+            android:maxLength="500"
+            android:maxLines="3"/>
+    </android.support.design.widget.TextInputLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/linearLayout_image_post_categories"
+        android:id="@+id/layout_price">
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/editText_layout_price_post"
+            android:layout_weight="2"
+            >
+            <EditText
+                android:id="@+id/editText_price_post"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:inputType="numberDecimal"
+                android:ems="10"
+                android:hint="@string/create_post_hint_price"
+                />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.v7.widget.AppCompatSpinner
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:entries="@array/currency"
+            android:id="@+id/spinner_currency">
+
+        </android.support.v7.widget.AppCompatSpinner>
+
+    </LinearLayout>
+
+    <Button
+        android:text="@string/create_post_button_text_sale_now"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/button_confirm_action_post"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:onClick="ButtonConfirmActionPostClicked"
+        style="@style/button"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/linearLayout_image_post_categories"
+        android:layout_below="@+id/editText_layout_description_post">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/create_post_hint_categroy"
+            android:layout_gravity="center"
+            android:id="@+id/textView3" />
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:id="@+id/spinner_choose_categorie"
+            android:gravity="center"
+            android:entries="@array/categories_array_activity"
+            android:prompt="@string/categories_prompt"
+            style="@style/Base.Widget.AppCompat.Button.Borderless"
+            android:dropDownSelector="@drawable/ic_keyboard_arrow_down_black_48dp"
+           >
+
+        </Spinner>
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_user_profile"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.bricenangue.nextgeneration.ebuycamer.UserProfileActivity">
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/lineare_layout_userprofile_picture"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        >
+        <ImageView
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            app:srcCompat="@drawable/com_facebook_profile_picture_blank_square"
+            android:adjustViewBounds="true"
+            android:scaleType="centerInside"
+
+            android:id="@+id/imageView_user_profile" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            style="@style/button_round"
+            android:text="@string/button_userprofile_save"
+            android:layout_marginLeft="20dp"
+            android:visibility="gone"
+            android:id="@+id/button_userprofile_save_picture"/>
+    </LinearLayout>
+
+    <TextView
+        android:text="John Smith"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/lineare_layout_userprofile_picture"
+        android:id="@+id/textView_userprofile_user_name"
+        android:layout_marginTop="10dp" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/colorAccent"
+        android:layout_below="@+id/textView_userprofile_user_name"
+        android:layout_marginBottom="5dp"
+        android:id="@+id/view_userprofile_separator_time_viewer"
+        android:alpha="0.2"/>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/lineare_layout_userprofile_email_container"
+        android:layout_below="@+id/view_userprofile_separator_time_viewer"
+        android:layout_marginTop="10dp">
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/editText_layout_userprofile_email"
+            android:layout_weight="1"
+            android:layout_marginRight="10dp">
+            <EditText
+                android:id="@+id/editText_userprofile_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:ems="10"
+                android:hint="@string/userprofile_hint_email"
+                android:clickable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:inputType="textEmailAddress"
+                android:longClickable="false"
+                android:linksClickable="false"
+                />
+        </android.support.design.widget.TextInputLayout>
+
+        <ImageButton
+            android:id="@+id/imageButton_userprofile_edit_email"
+            android:contentDescription="@string/userprofile_hint_edit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_mode_edit_black_24dp"
+            android:layout_weight="1"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/lineare_layout_userprofile_location_container"
+        android:layout_below="@+id/lineare_layout_userprofile_email_container"
+        android:layout_marginTop="10dp">
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/editText_layout_userprofile_location"
+            android:layout_weight="1"
+            android:layout_marginRight="10dp">
+            <EditText
+                android:id="@+id/editText_userprofile_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:ems="10"
+                android:hint="@string/userprofile_hint_location"
+                android:clickable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:longClickable="false"
+                android:linksClickable="false"/>
+        </android.support.design.widget.TextInputLayout>
+
+        <ImageButton
+            android:id="@+id/imageButton_userprofile_edit_location"
+            android:contentDescription="@string/userprofile_hint_edit_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_place_black_24dp"
+            android:layout_weight="1"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
+    </LinearLayout>
+
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/editText_layout_userprofile_numberofAds"
+        android:layout_below="@+id/lineare_layout_userprofile_location_container"
+        android:layout_marginTop="10dp">
+        <EditText
+            android:id="@+id/editText_userprofile_numberofAds"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:ems="10"
+            android:hint="@string/userprofile_hint_numberOfAds"
+            android:clickable="false"
+            android:focusable="false"
+            android:focusableInTouchMode="false"
+            android:longClickable="false"
+            android:linksClickable="false"
+            />
+    </android.support.design.widget.TextInputLayout>
+
+
+</RelativeLayout>

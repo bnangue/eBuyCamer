@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="122dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="2dp">
+
+        <ImageView
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:scaleType="centerInside"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/imageView_publicationFirstphoto"
+            android:paddingBottom="2dp"
+            android:adjustViewBounds="true"
+            />
+
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/relativLayout_mypost_cardview"
+            android:layout_alignParentTop="true"
+            android:layout_alignBottom="@+id/imageView_publicationFirstphoto"
+            android:layout_toRightOf="@+id/imageView_publicationFirstphoto"
+            android:layout_toEndOf="@+id/imageView_publicationFirstphoto"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginLeft="10dp"
+            android:paddingBottom="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:orientation="horizontal"
+                android:id="@+id/linearLayout_location"
+                android:padding="5dp"
+                android:layout_marginRight="5dp"
+                android:weightSum="1">
+                <ImageView
+                    android:id="@+id/imageView_publicationLocation"
+                    android:layout_width="15dp"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_place_black_48dp"
+                    />
+                <TextView
+                    android:id="@+id/textView_publication_locatiomn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text="Location"
+                    android:gravity="center"
+                    android:layout_gravity="end"
+                    android:layout_marginRight="20dp"
+                    />
+
+                <TextView
+                    android:layout_width="53dp"
+                    android:layout_height="wrap_content"
+                    android:text="today"
+                    android:id="@+id/textView_publication_time"
+                    android:gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:layout_weight="1"
+                    />
+            </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Titre de la Publication qui est longue tres longe  oui elle "
+                android:id="@+id/textView_publication_title"
+                android:gravity="start"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_marginBottom="10dp"
+                android:textSize="16sp"
+                android:maxLines="2"
+                android:textStyle="bold"
+                android:maxLength="42"
+                android:layout_below="@+id/linearLayout_location"
+                android:layout_marginRight="5dp"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1.000 FCFA"
+                android:id="@+id/textView_publication_price"
+                android:gravity="center"
+                android:layout_alignParentBottom="true"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:textColor="@color/colorgreen"/>
+
+
+        </RelativeLayout>
+
+
+    </RelativeLayout>
+</RelativeLayout>
