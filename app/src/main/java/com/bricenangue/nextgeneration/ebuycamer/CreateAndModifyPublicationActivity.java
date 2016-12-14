@@ -7,6 +7,8 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,11 +41,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CreateAndModifyPublicationActivity extends AppCompatActivity implements AdapterView.OnItemLongClickListener {
+public class CreateAndModifyPublicationActivity extends AppCompatActivity {
 
     private static final int GALLERY_INTENT=01;
-    private TwoWayView listview;
-    private TowWaysViewAdapter towWaysViewAdapter;
+   // private TwoWayView listview;
+   // private TowWaysViewAdapter towWaysViewAdapter;
     private ArrayList<Uri> uris =new ArrayList<>();
     private ArrayList<PublicationPhotos> downloadUris=new ArrayList<>();
     private static final int CAMERA_INTENT=02;
@@ -63,15 +65,16 @@ public class CreateAndModifyPublicationActivity extends AppCompatActivity implem
     private String[] photonames={"photo1","photo2","photo3","photo4","photo5"};
     private PrivateContent postToedit;
     private String location;
-
-
+    private RecyclerView recyclerViewHorizontal;
 
     private String [] categoriesArray;
 
     private Spinner spinnerCurrency;
     private ArrayList<Object> sortOptionslist;
-    ImageView imageViewAddNewImage;
+    private ImageView imageViewAddNewImage;
     private String categoryFromPost;
+    private LinearLayoutManager layoutManager;
+    private HorizontalRecyclerViewAdapter recyclerViewAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,11 +109,12 @@ public class CreateAndModifyPublicationActivity extends AppCompatActivity implem
         editTextTitle=(EditText) findViewById(R.id.editText_title_post);
 
 
-        listview=(TwoWayView) findViewById(R.id.lvItems);
+        //listview=(TwoWayView) findViewById(R.id.lvItems);
 
-        towWaysViewAdapter=new TowWaysViewAdapter(this,uris);
-        listview.setAdapter(towWaysViewAdapter);
-        listview.setOnItemLongClickListener(this);
+        //towWaysViewAdapter=new TowWaysViewAdapter(this,uris);
+       // listview.setAdapter(towWaysViewAdapter);
+       // listview.setOnItemLongClickListener(this);
+        /**
         listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -119,6 +123,16 @@ public class CreateAndModifyPublicationActivity extends AppCompatActivity implem
                 .putExtra("imageUri",towWaysViewAdapter.getItem(i).toString()));
             }
         });
+
+        **/
+        recyclerViewHorizontal=(RecyclerView)findViewById(R.id.horizontal_recycler_view_create_post) ;
+        layoutManager=new LinearLayoutManager(this,LinearLayoutManager.HORIZONTAL,false);
+
+        recyclerViewHorizontal.setHasFixedSize(true);
+        recyclerViewHorizontal.setLayoutManager(layoutManager);
+
+        populateImages(uris);
+
 
          imageViewAddNewImage=(ImageView)findViewById(R.id.imageView_Choose_Image_post);
         imageViewAddNewImage.setOnClickListener(new View.OnClickListener() {
@@ -150,14 +164,16 @@ public class CreateAndModifyPublicationActivity extends AppCompatActivity implem
 
                if(dataSnapshot.hasChild("publictionPhotos")){
                    for(PublicationPhotos uri : post.getPublictionPhotos()){
-                       towWaysViewAdapter.add(Uri.parse(uri.getUri()));
-                       //uris.add(uri);
+                       recyclerViewAdapter.addUri(Uri.parse(uri.getUri()));
+                       //uris.add(Uri.parse(uri.getUri()));
                        //towWaysViewAdapter.notifyDataSetChanged();
-                       if (towWaysViewAdapter.getCount()>=5){
+                       if (recyclerViewAdapter!=null && recyclerViewAdapter.getItemCount()>=5){
                            imageViewAddNewImage.setEnabled(false);
+
                        }else {
                            imageViewAddNewImage.setEnabled(true);
                        }
+
                    }
                }
 
@@ -180,6 +196,24 @@ public class CreateAndModifyPublicationActivity extends AppCompatActivity implem
     }
 
 
+    private void populateImages(ArrayList<Uri> uris1){
+        recyclerViewAdapter=new HorizontalRecyclerViewAdapter(this, uris1
+                ,new HorizontalRecyclerViewAdapter.HorizontalAdapterClickListener() {
+            @Override
+            public void onItemClick(int position, View v) {
+                startActivity(new Intent(CreateAndModifyPublicationActivity.this,
+                        ViewImageFullScreenActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        .putExtra("imageUri",uris.get(position).toString()));
+            }
+
+            @Override
+            public void ondelteCLick(int position) {
+                delete(position);
+            }
+        });
+
+        recyclerViewHorizontal.setAdapter(recyclerViewAdapter);
+    }
 
     private int getCurrencyPosition(String currency){
         if(currency.equals(getString(R.string.currency_xaf))
@@ -257,7 +291,7 @@ public class CreateAndModifyPublicationActivity extends AppCompatActivity implem
             reftoedit.removeValue();
         }
 
-        final ArrayList<Uri> arrayList =towWaysViewAdapter.getUris();
+        final ArrayList<Uri> arrayList =uris;
         final StorageReference referencePost = rootStorage.child(auth.getCurrentUser().getUid()).
                 child(ConfigApp.FIREBASE_APP_URL_USERS_POSTS).child(postid);
 
@@ -584,7 +618,7 @@ public class CreateAndModifyPublicationActivity extends AppCompatActivity implem
         userSharedPreference.addNumberofAds();
 
 
-        final ArrayList<Uri> arrayList =towWaysViewAdapter.getUris();
+        final ArrayList<Uri> arrayList =uris;
         StorageReference referencePost = rootStorage.child(auth.getCurrentUser().getUid()).
                 child(ConfigApp.FIREBASE_APP_URL_USERS_POSTS).child(key);
         if(arrayList.size()>0){
@@ -732,10 +766,10 @@ public class CreateAndModifyPublicationActivity extends AppCompatActivity implem
 
         if(requestCode == GALLERY_INTENT && resultCode==RESULT_OK){
             Uri uri= data.getData();
-            towWaysViewAdapter.add(uri);
+            recyclerViewAdapter.addUri(uri);
             //uris.add(uri);
             //towWaysViewAdapter.notifyDataSetChanged();
-            if (towWaysViewAdapter.getCount()>=5){
+            if (recyclerViewAdapter.getItemCount()>=5){
                 imageViewAddNewImage.setEnabled(false);
             }else {
                 imageViewAddNewImage.setEnabled(true);
@@ -786,8 +820,7 @@ public class CreateAndModifyPublicationActivity extends AppCompatActivity implem
         startActivityForResult(intent, GALLERY_INTENT);
     }
 
-    @Override
-    public boolean onItemLongClick(AdapterView<?> adapterView, View view, final int i, long l) {
+    private void delete(final int i){
 
         progressBar = new ProgressDialog(this);
         progressBar.setCancelable(false);
@@ -826,48 +859,47 @@ public class CreateAndModifyPublicationActivity extends AppCompatActivity implem
 
                     root.child("Cities").child(location).child(postToedit.getCategorie().getName())
                             .child(postToeditId).child("privateContent/publictionPhotos").setValue(publicationPhotoses)
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if(task.isSuccessful()){
-                                root.child(ConfigApp.FIREBASE_APP_URL_USERS_POSTS)
-                                        .child(postToeditId).child("privateContent/publictionPhotos").setValue(downloadUris)
-                                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        towWaysViewAdapter.remove(uris.get(i));
+                            .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if(task.isSuccessful()){
+                                        root.child(ConfigApp.FIREBASE_APP_URL_USERS_POSTS)
+                                                .child(postToeditId).child("privateContent/publictionPhotos").setValue(downloadUris)
+                                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                    @Override
+                                                    public void onSuccess(Void aVoid) {
+                                                        recyclerViewAdapter.delete(uris.get(i),i);
+                                                        if (progressBar!=null){
+                                                            progressBar.dismiss();
+                                                        }
+                                                    }
+                                                });
+
+                                    }else {
+                                        //error
+                                        Toast.makeText(getApplicationContext(),getString(R.string.string_toast_text_error)
+                                                + " " +task.getException().getMessage(),Toast.LENGTH_SHORT).show();
                                         if (progressBar!=null){
                                             progressBar.dismiss();
                                         }
                                     }
-                                });
-
-                            }else {
-                                //error
-                                Toast.makeText(getApplicationContext(),getString(R.string.string_toast_text_error)
-                                        + " " +task.getException().getMessage(),Toast.LENGTH_SHORT).show();
-                                if (progressBar!=null){
-                                    progressBar.dismiss();
                                 }
-                            }
-                        }
-                    });
+                            });
 
                     break;
                 }
             }
 
         }else {
-            towWaysViewAdapter.remove(uris.get(i));
+            recyclerViewAdapter.delete(uris.get(i),i);
             if (progressBar!=null){
                 progressBar.dismiss();
             }
         }
         //uris.remove(uris);
         //towWaysViewAdapter.notifyDataSetChanged();
-        if(towWaysViewAdapter.getCount()<5){
+        if(recyclerViewAdapter.getItemCount()<5){
             imageViewAddNewImage.setEnabled(true);
         }
-        return false;
     }
 }

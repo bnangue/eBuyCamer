@@ -185,5 +185,9 @@
     <string name="alertDialoglogout">Déconnecter cette séssion?</string>
     <string name="button_cancel">Annuler</string>
     <string name="button_logout">Déconnecter</string>
+    <string name="alertDialogdeleteAccount">Supprimer ce compte définitivement?</string>
+    <string name="alertDialogdeleteAccountMessage">Tous vos données et publications seront perdues</string>
+    <string name="button_delete_Account">Supprimer mon compte</string>
+    <string name="action_delete_account">Supprimer mon compte</string>
 
 </resources>

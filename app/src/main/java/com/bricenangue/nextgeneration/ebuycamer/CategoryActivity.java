@@ -112,6 +112,8 @@ public class CategoryActivity extends AppCompatActivity implements View.OnClickL
                         .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
                 break;
             case R.id.button_go_to_setting_category_activity:
+                startActivity(new Intent(CategoryActivity.this,SettingsActivity.class));
+
                 break;
         }
     }

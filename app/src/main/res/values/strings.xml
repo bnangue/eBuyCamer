@@ -256,5 +256,9 @@
     <string name="alertDialoglogout">Log out from this Session?</string>
     <string name="button_cancel">Cancel</string>
     <string name="button_logout">Log out</string>
+    <string name="action_delete_account">Delete my account</string>
+    <string name="alertDialogdeleteAccount">Delete this account permanently?</string>
+    <string name="alertDialogdeleteAccountMessage">All your data and publications will be lost.</string>
+    <string name="button_delete_Account">Delete my account</string>
 
 </resources>
