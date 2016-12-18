@@ -15,6 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -59,6 +60,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     private Uri pictureUri;
     private DatabaseReference root;
     private StorageReference rootStorage;
+    private static final int ENTERPASSWORD=4;
+    private static final int UPDATEEMAIL=5;
+    private ProgressBar progressBare;
 
 
     @Override
@@ -78,6 +82,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         root=FirebaseDatabase.getInstance().getReference();
         rootStorage=FirebaseStorage.getInstance().getReference();
 
+        progressBare=(ProgressBar)findViewById(R.id.progress_bar_user_profile);
         editTextEmail=(EditText)findViewById(R.id.editText_userprofile_email);
         editTextNumbOfAds=(EditText)findViewById(R.id.editText_userprofile_numberofAds);
 
@@ -144,15 +149,21 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     .into(imageViewUserPicture, new Callback() {
                         @Override
                         public void onSuccess() {
+                            progressBare.setVisibility(View.GONE);
                         }
 
                         @Override
                         public void onError() {
                             Picasso.with(getApplicationContext()).load(userPublic.getProfilePhotoUri())
                                     .fit().centerInside().into(imageViewUserPicture);
+                            progressBare.setVisibility(View.GONE);
+
 
                         }
                     });
+        }else {
+            progressBare.setVisibility(View.GONE);
+
         }
 
         cancelProgressbar();
@@ -163,6 +174,9 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     public void onClick(View view) {
         switch (view.getId()){
             case R.id.imageButton_userprofile_edit_email:
+
+                startActivityForResult(new Intent(UserProfileActivity.this,
+                        DeleteAccountEnterPasswordActivity.class).putExtra("isEmail",true),UPDATEEMAIL);
 
                 break;
             case R.id.imageButton_userprofile_edit_location:
@@ -213,6 +227,215 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
     }
 
+    private void continueDeleteAccount(){
+
+
+        showProgressBar();
+        // delete all publications and user Account
+        final DatabaseReference referenceuser=root.child(ConfigApp.FIREBASE_APP_URL_USERS).child(user.getUid());
+
+        //delete users' publications
+        final DatabaseReference refuserPost1=root.child(ConfigApp.FIREBASE_APP_URL_USERS_POSTS_USER).child(user.getUid());
+        refuserPost1.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if(dataSnapshot.hasChildren()){
+                    for(DataSnapshot publication : dataSnapshot.getChildren()){
+                        keys.add(publication.getKey());
+                        mypublications.add(publication.getValue(Publication.class));
+                        DatabaseReference ref =refuserPost1.child(publication.getKey());
+                        ref.child("publicContent").removeValue();
+                        ref.child("privateContent").removeValue();
+                        if(keys.size()==dataSnapshot.getChildrenCount()){
+                            //delete publication marked as favorite
+
+                            DatabaseReference refPostfav=root.child(ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES_USER).child(user.getUid());
+                            refPostfav.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (task.isComplete()&& task.isSuccessful()){
+                                        DatabaseReference refuserFav=root.child(ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES)
+                                                .child(user.getUid());
+                                        refuserFav.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isComplete()&& task.isSuccessful()){
+
+                                                    DatabaseReference refPostexist=root.child(ConfigApp.FIREBASE_APP_URL_POSTS_EXIST);
+                                                    for (String key : keys){
+
+                                                        refPostexist.child(key).removeValue();
+
+                                                    }
+
+                                                    final DatabaseReference refPost=root.child(ConfigApp.FIREBASE_APP_URL_USERS_POSTS);
+                                                    refPost.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                                            for (String key: keys){
+                                                                for (DataSnapshot pub : dataSnapshot.getChildren()){
+
+
+                                                                    if(!pub.getKey().equals(key)){
+                                                                        continue;
+                                                                    }else {
+                                                                        refPost.child(key).child("publicContent").removeValue();
+                                                                        refPost.child(key).child("privateContent").removeValue();
+                                                                    }
+
+
+                                                                }
+                                                            }
+
+                                                            for(Publication pub : mypublications){
+                                                                DatabaseReference refCity=root.child(ConfigApp.FIREBASE_APP_URL_REGIONS)
+                                                                        .child(pub.getPrivateContent().getLocation().getName())
+                                                                        .child(pub.getPrivateContent().getCategorie().getName())
+                                                                        .child(pub.getPrivateContent().getUniquefirebaseId());
+
+                                                                refCity.child("publicContent").removeValue();
+                                                                refCity.child("privateContent").removeValue();
+                                                            }
+
+                                                            referenceuser.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                @Override
+                                                                public void onComplete(@NonNull Task<Void> task) {
+                                                                    if (task.isSuccessful()){
+                                                                        // stop
+                                                                        user.delete()
+                                                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                    @Override
+                                                                                    public void onComplete(@NonNull Task<Void> task) {
+                                                                                        if (task.isSuccessful()) {
+                                                                                            accountdeleted();
+                                                                                        }
+                                                                                    }
+                                                                                });
+
+                                                                    }
+                                                                }
+                                                            });
+                                                        }
+
+                                                        @Override
+                                                        public void onCancelled(DatabaseError databaseError) {
+                                                            cancelProgressbar();
+                                                        }
+                                                    });
+
+
+                                                }else{
+
+                                                    cancelProgressbar();
+                                                    //error
+                                                }
+                                            }
+                                        });
+
+                                    }else {
+                                        cancelProgressbar();
+                                        // error
+                                    }
+                                }
+                            });
+
+                        }
+                    }
+                }else {
+                    //user has no post continue and check if has favorite
+                    final DatabaseReference refPostfav=root.child(ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES_USER).child(user.getUid());
+                    refPostfav.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if(dataSnapshot.hasChildren()){
+                                for(DataSnapshot pubKey : dataSnapshot.getChildren()){
+                                    DatabaseReference refuserFav=root.child(ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES)
+                                            .child(user.getUid());
+                                    refuserFav.child(pubKey.getKey()).removeValue();
+
+                                    refuserFav.addListenerForSingleValueEvent(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            if (!dataSnapshot.hasChildren()){
+                                                refPostfav.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                     @Override
+                                                                                                       public void onComplete(@NonNull Task<Void> task) {
+                                                                                                           if (task.isComplete()&& task.isSuccessful()){
+                                                                                                               referenceuser.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                   @Override
+                                                                                                                   public void onComplete(@NonNull Task<Void> task) {
+                                                                                                                       if (task.isSuccessful()){
+                                                                                                                           // stop
+                                                                                                                           user.delete()
+                                                                                                                                   .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                                                                                       @Override
+                                                                                                                                       public void onComplete(@NonNull Task<Void> task) {
+                                                                                                                                           if (task.isSuccessful()) {
+                                                                                                                                               accountdeleted();
+                                                                                                                                           }
+                                                                                                                                       }
+                                                                                                                                   });
+
+                                                                                                                       }
+                                                                                                                   }
+                                                                                                               });
+                                                                                                           }else {
+                                                                                                               cancelProgressbar();
+                                                                                                           }
+                                                                                                       }
+                                                                                               }
+                                                );
+
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
+                                            cancelProgressbar();
+                                        }
+                                    });
+                                }
+                            }else {
+                                referenceuser.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (task.isSuccessful()){
+                                            // stop
+                                            user.delete()
+                                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<Void> task) {
+                                                            if (task.isSuccessful()) {
+                                                                accountdeleted();
+                                                            }
+                                                        }
+                                                    });
+
+                                        }else {
+                                            cancelProgressbar();
+                                        }
+                                    }
+                                });
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            cancelProgressbar();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                cancelProgressbar();
+            }
+        });
+
+    }
+
+
     private void deleteAccount() {
         final AlertDialog alertDialog =
                 new AlertDialog.Builder(UserProfileActivity.this).setTitle(
@@ -234,187 +457,8 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     public void onClick(DialogInterface dialogInterface, int i) {
                        // auth.signOut();
 
-                        showProgressBar();
-                        // delete all publications and user Account
-                        final DatabaseReference referenceuser=root.child(ConfigApp.FIREBASE_APP_URL_USERS).child(user.getUid());
-
-                        //delete users' publications
-                        final DatabaseReference refuserPost1=root.child(ConfigApp.FIREBASE_APP_URL_USERS_POSTS_USER).child(user.getUid());
-                        refuserPost1.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                if(dataSnapshot.hasChildren()){
-                                    for(DataSnapshot publication : dataSnapshot.getChildren()){
-                                        keys.add(publication.getKey());
-                                        mypublications.add(publication.getValue(Publication.class));
-                                        DatabaseReference ref =refuserPost1.child(publication.getKey());
-                                        ref.child("publicContent").removeValue();
-                                        ref.child("privateContent").removeValue();
-                                        if(keys.size()==dataSnapshot.getChildrenCount()){
-                                            //delete publication marked as favorite
-
-                                            DatabaseReference refPostfav=root.child(ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES_USER).child(user.getUid());
-                                            refPostfav.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if (task.isComplete()&& task.isSuccessful()){
-                                                        DatabaseReference refuserFav=root.child(ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES)
-                                                                .child(user.getUid());
-                                                        refuserFav.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                            @Override
-                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                if (task.isComplete()&& task.isSuccessful()){
-
-                                                                    DatabaseReference refPostexist=root.child(ConfigApp.FIREBASE_APP_URL_POSTS_EXIST);
-                                                                    for (String key : keys){
-
-                                                                        refPostexist.child(key).removeValue();
-
-                                                                    }
-
-                                                                    final DatabaseReference refPost=root.child(ConfigApp.FIREBASE_APP_URL_USERS_POSTS);
-                                                                    refPost.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                                        @Override
-                                                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                                                            for (String key: keys){
-                                                                                for (DataSnapshot pub : dataSnapshot.getChildren()){
-
-
-                                                                                    if(!pub.getKey().equals(key)){
-                                                                                        continue;
-                                                                                    }else {
-                                                                                        refPost.child(key).child("publicContent").removeValue();
-                                                                                        refPost.child(key).child("privateContent").removeValue();
-                                                                                    }
-
-
-                                                                                }
-                                                                            }
-
-                                                                            for(Publication pub : mypublications){
-                                                                                DatabaseReference refCity=root.child(ConfigApp.FIREBASE_APP_URL_REGIONS)
-                                                                                        .child(pub.getPrivateContent().getLocation().getName())
-                                                                                        .child(pub.getPrivateContent().getCategorie().getName())
-                                                                                        .child(pub.getPrivateContent().getUniquefirebaseId());
-
-                                                                                refCity.child("publicContent").removeValue();
-                                                                                refCity.child("privateContent").removeValue();
-                                                                            }
-
-                                                                            referenceuser.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                @Override
-                                                                                public void onComplete(@NonNull Task<Void> task) {
-                                                                                    if (task.isSuccessful()){
-                                                                                        // stop
-                                                                                        user.delete()
-                                                                                                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                    @Override
-                                                                                                    public void onComplete(@NonNull Task<Void> task) {
-                                                                                                        if (task.isSuccessful()) {
-                                                                                                            accountdeleted();
-                                                                                                        }
-                                                                                                    }
-                                                                                                });
-
-                                                                                    }
-                                                                                }
-                                                                            });
-                                                                        }
-
-                                                                        @Override
-                                                                        public void onCancelled(DatabaseError databaseError) {
-                                                                            cancelProgressbar();
-                                                                        }
-                                                                    });
-
-
-                                                                }else{
-
-                                                                    cancelProgressbar();
-                                                                    //error
-                                                                }
-                                                            }
-                                                        });
-
-                                                    }else {
-                                                        cancelProgressbar();
-                                                        // error
-                                                    }
-                                                }
-                                            });
-
-                                        }
-                                    }
-                                }else {
-                                    //user has no post continue and check if has favorite
-                                    final DatabaseReference refPostfav=root.child(ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES_USER).child(user.getUid());
-                                    refPostfav.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                            if(dataSnapshot.hasChildren()){
-                                                for(DataSnapshot pubKey : dataSnapshot.getChildren()){
-                                                    DatabaseReference refuserFav=root.child(ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES)
-                                                            .child(user.getUid());
-                                                    refuserFav.child(pubKey.getKey()).removeValue();
-
-                                                    refuserFav.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                        @Override
-                                                        public void onDataChange(DataSnapshot dataSnapshot) {
-                                                            if (!dataSnapshot.hasChildren()){
-                                                                refPostfav.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                            @Override
-                                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                                if (task.isComplete()&& task.isSuccessful()){
-                                                                                    referenceuser.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                        @Override
-                                                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                                                            if (task.isSuccessful()){
-                                                                                                // stop
-                                                                                                user.delete()
-                                                                                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                                                            @Override
-                                                                                                            public void onComplete(@NonNull Task<Void> task) {
-                                                                                                                if (task.isSuccessful()) {
-                                                                                                                    accountdeleted();
-                                                                                                                }
-                                                                                                            }
-                                                                                                        });
-
-                                                                                            }
-                                                                                        }
-                                                                                    });
-                                                                                }else {
-                                                                                    cancelProgressbar();
-                                                                                }
-                                                                            }
-                                                                        }
-                                                                );
-
-                                                            }
-                                                        }
-
-                                                        @Override
-                                                        public void onCancelled(DatabaseError databaseError) {
-                                                            cancelProgressbar();
-                                                        }
-                                                    });
-                                                }
-                                            }
-                                        }
-
-                                        @Override
-                                        public void onCancelled(DatabaseError databaseError) {
-                                            cancelProgressbar();
-                                        }
-                                    });
-                                }
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-                                cancelProgressbar();
-                            }
-                        });
+                        startActivityForResult(new Intent(UserProfileActivity.this,
+                                DeleteAccountEnterPasswordActivity.class),ENTERPASSWORD);
 
                     }
                 });
@@ -442,6 +486,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     public void onClick(DialogInterface dialogInterface, int i) {
                         alertDialog.dismiss();
 
+
                     }
 
                 });
@@ -449,7 +494,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 , new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        auth.signOut();
+                        FirebaseAuth.getInstance().signOut();
                         startActivity(new Intent(UserProfileActivity.this,MainActivity.class)
                                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
                         finish();
@@ -551,6 +596,35 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
             UserSharedPreference preference =new UserSharedPreference(getApplicationContext());
             preference.storeUserLocation(location);
 
+        }else if (requestCode == ENTERPASSWORD && resultCode==RESULT_OK){
+            continueDeleteAccount();
+        }else if(requestCode == UPDATEEMAIL && resultCode==RESULT_OK){
+            changeEmail(data.getExtras().getString("email"));
+            showProgressBar();
         }
+    }
+
+    private void changeEmail(final String email) {
+
+        user.updateEmail(email)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            DatabaseReference reference = FirebaseDatabase.getInstance().getReference()
+                                    .child(ConfigApp.FIREBASE_APP_URL_USERS)
+                                    .child(user.getUid())
+                                    .child("userPublic").child("email");
+                            reference.setValue(email).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    editTextEmail.setText(email);
+                                    cancelProgressbar();
+                                }
+                            });
+
+                        }
+                    }
+                });
     }
 }

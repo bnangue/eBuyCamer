@@ -1,5 +1,6 @@
 package com.bricenangue.nextgeneration.ebuycamer;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -18,6 +19,7 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ui.ResultCodes;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -34,6 +36,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -49,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        FacebookSdk.sdkInitialize(getApplicationContext());
 
         setContentView(R.layout.activity_main);
 
@@ -59,54 +61,76 @@ public class MainActivity extends AppCompatActivity {
         int code = api.isGooglePlayServicesAvailable(this);
         if (code == ConnectionResult.SUCCESS) {
             // Do Your Stuff Here
-        } else {
-            /**
-            AlertDialog alertDialog =
-                    new AlertDialog.Builder(MainActivity.this, R.style.AppTheme).setMessage(
-                            "You need to download Google Play Services in order to use the application")
-                            .create();
-            alertDialog.show();
-             **/
-        }
 
-        auth =FirebaseAuth.getInstance();
-        root=FirebaseDatabase.getInstance().getReference();
-        storageRoot=FirebaseStorage.getInstance().getReference();
+            auth =FirebaseAuth.getInstance();
+            root=FirebaseDatabase.getInstance().getReference();
+            storageRoot=FirebaseStorage.getInstance().getReference();
+            showProgressbar();
 
-        if(auth!=null){
-            user=auth.getCurrentUser();
-            if(user != null ){
-                //user logged in
+            if(auth!=null){
+                showProgressbar();
+                user=auth.getCurrentUser();
+                if(user != null ){
+                    //user logged in
 
-                for(UserInfo profile : user.getProviderData()) {
-                    // check if the provider id matches "facebook.com"
-                    if(profile.getProviderId().equals(getString(R.string.facebook_provider_id))) {
+                    List<? extends UserInfo> list=user.getProviderData();
+                    String providerId=list.get(1).getProviderId();
+
+                    if(providerId.equals(getString(R.string.facebook_provider_id))) {
 
                         procide(user);
 
-                    }else if (profile.getProviderId().equals(getString(R.string.password_provider_id))
+                    }else if (providerId.equals(getString(R.string.password_provider_id))
                             && user.isEmailVerified()){
 
                         procide(user);
 
-                    }else if (profile.getProviderId().equals(getString(R.string.password_provider_id))
+                    }else if (providerId.equals(getString(R.string.password_provider_id))
                             && !user.isEmailVerified()) {
 
                         verifyMail(user);
+                    }else {
+                        auth.signOut();
+                        dismissProgressbar();
+                        startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
+                                .setProviders(AuthUI.EMAIL_PROVIDER,
+                                        AuthUI.FACEBOOK_PROVIDER)
+                                .setIsSmartLockEnabled(!BuildConfig.DEBUG)
+                                .setTheme(R.style.AppTheme)
+                                .build(),FB_SIGN_IN);
+
                     }
-                }
 
+
+                }else {
+
+                    dismissProgressbar();
+
+                    startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
+                            .setProviders(AuthUI.EMAIL_PROVIDER,
+                                    AuthUI.FACEBOOK_PROVIDER)
+                            .setIsSmartLockEnabled(!BuildConfig.DEBUG)
+                            .setTheme(R.style.AppTheme)
+                            .build(),FB_SIGN_IN);
+                }
             }else {
+                dismissProgressbar();
 
-                if (progressBar!=null){
-                    progressBar.dismiss();
-                }
                 startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
                         .setProviders(AuthUI.EMAIL_PROVIDER,
                                 AuthUI.FACEBOOK_PROVIDER)
                         .setIsSmartLockEnabled(!BuildConfig.DEBUG)
                         .setTheme(R.style.AppTheme)
                         .build(),FB_SIGN_IN);
+            }
+        } else {
+
+            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(code, this, 0);
+            if (dialog != null) {
+                //This dialog will help the user update to the latest GooglePlayServices
+                dialog.show();
+
+
             }
         }
 
@@ -127,25 +151,24 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(new Intent(MainActivity.this,CategoryActivity.class)
                             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
                     finish();
-                    if (progressBar!=null){
-                        progressBar.dismiss();
-                    }
+                    dismissProgressbar();
+
                 }else {
 
                     startActivity(new Intent(MainActivity.this,LocationsActivity.class)
                             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
                     finish();
-                    if (progressBar!=null){
-                        progressBar.dismiss();
-                    }
+                    dismissProgressbar();
+
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                if (progressBar!=null){
-                    progressBar.dismiss();
-                }
+                dismissProgressbar();
+                Toast.makeText(getApplicationContext(),databaseError.getMessage() + "ici"
+                ,Toast.LENGTH_SHORT).show();
+
             }
         });
     }
@@ -164,6 +187,7 @@ public class MainActivity extends AppCompatActivity {
 
                        procide(user);
                         alertDialog.dismiss();
+                        dismissProgressbar();
 
                     }
 
@@ -260,18 +284,14 @@ public class MainActivity extends AppCompatActivity {
 
                                                         }else if ( !emailVerified && finalIspassword){
                                                             verifyMail(user);
-                                                            auth.signOut();
-                                                            if (progressBar!=null){
-                                                                progressBar.dismiss();
-                                                            }
+
                                                         }else if (emailVerified && finalIspassword ){
                                                             procide(user);
                                                         }
                                                     }else {
-                                                        showErrorSignInAndRelaunch();
-                                                        if (progressBar!=null){
-                                                            progressBar.dismiss();
-                                                        }
+                                                        showErrorSignInAndRelaunch("7");
+                                                        dismissProgressbar();
+
                                                     }
                                                 }
                                             });
@@ -291,20 +311,16 @@ public class MainActivity extends AppCompatActivity {
                                                                 public void onComplete(@NonNull Task<Void> task) {
 
                                                                     verifyMail(user);
-                                                                    auth.signOut();
-                                                                    if (progressBar!=null){
-                                                                        progressBar.dismiss();
-                                                                    }
+
                                                                 }
                                                             });
                                                         }else if (emailVerified && finalIspassword ){
                                                             procide(user);
                                                         }
                                                     }else {
-                                                        showErrorSignInAndRelaunch();
-                                                        if (progressBar!=null){
-                                                            progressBar.dismiss();
-                                                        }
+                                                        showErrorSignInAndRelaunch("1");
+                                                        dismissProgressbar();
+
                                                     }
                                                 }
                                             });
@@ -314,10 +330,9 @@ public class MainActivity extends AppCompatActivity {
 
                                     @Override
                                     public void onCancelled(DatabaseError databaseError) {
-                                        showErrorSignInAndRelaunch();
-                                        if (progressBar!=null){
-                                            progressBar.dismiss();
-                                        }
+                                        showErrorSignInAndRelaunch(databaseError.getMessage()+"5");
+                                        dismissProgressbar();
+
                                     }
                                 });
                             }else {
@@ -339,17 +354,13 @@ public class MainActivity extends AppCompatActivity {
 
                                                         }else if ( !emailVerified && finalIspassword){
                                                             verifyMail(user);
-                                                            if (progressBar!=null){
-                                                                progressBar.dismiss();
-                                                            }
+
                                                         }else if (emailVerified && finalIspassword ){
                                                             procide(user);
                                                         }
                                                     }else {
-                                                        showErrorSignInAndRelaunch();
-                                                        if (progressBar!=null){
-                                                            progressBar.dismiss();
-                                                        }
+                                                        showErrorSignInAndRelaunch("4");
+                                                        dismissProgressbar();
                                                     }
                                                 }
                                             });
@@ -369,19 +380,14 @@ public class MainActivity extends AppCompatActivity {
                                                                 public void onComplete(@NonNull Task<Void> task) {
 
                                                                     verifyMail(user);
-                                                                    if (progressBar!=null){
-                                                                        progressBar.dismiss();
-                                                                    }
                                                                 }
                                                             });
                                                         }else if (emailVerified && finalIspassword ){
                                                             procide(user);
                                                         }
                                                     }else {
-                                                      showErrorSignInAndRelaunch();
-                                                        if (progressBar!=null){
-                                                            progressBar.dismiss();
-                                                        }
+                                                      showErrorSignInAndRelaunch("3");
+                                                        dismissProgressbar();
                                                     }
                                                 }
                                             });
@@ -391,10 +397,8 @@ public class MainActivity extends AppCompatActivity {
 
                                     @Override
                                     public void onCancelled(DatabaseError databaseError) {
-                                        showErrorSignInAndRelaunch();
-                                         if (progressBar!=null){
-                                            progressBar.dismiss();
-                                        }
+                                        showErrorSignInAndRelaunch(databaseError.getMessage()+"2");
+                                         dismissProgressbar();
                                     }
                                 });
 
@@ -403,10 +407,8 @@ public class MainActivity extends AppCompatActivity {
 
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
-                            showErrorSignInAndRelaunch();
-                            if (progressBar!=null){
-                                progressBar.dismiss();
-                            }
+                            showErrorSignInAndRelaunch(databaseError.getMessage()+"1");
+                           dismissProgressbar();
                         }
                     });
 
@@ -416,21 +418,19 @@ public class MainActivity extends AppCompatActivity {
 
             // Sign in canceled
             if (resultCode == RESULT_CANCELED) {
-                if (progressBar!=null){
-                    progressBar.dismiss();
-                }
-
-                showErrorSignInAndRelaunch();
+               dismissProgressbar();
+                Toast.makeText(getApplicationContext()
+                        ,getString(R.string.connection_to_server_cancelled)
+                        ,Toast.LENGTH_SHORT).show();
+                onBackPressed();
                 return;
             }
 
             // No network
             if (resultCode == ResultCodes.RESULT_NO_NETWORK) {
-                if (progressBar!=null){
-                    progressBar.dismiss();
-                }
+                dismissProgressbar();
 
-                showErrorSignInAndRelaunch();
+                showErrorSignInAndRelaunch("result no network");
                 return;
             }
 
@@ -438,10 +438,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void showErrorSignInAndRelaunch(){
-
+    private void showErrorSignInAndRelaunch(String message){
+       // getString(R.string.mainpage_alertdialog_signin_request_false)
         Toast.makeText(getApplicationContext()
-                ,getString(R.string.mainpage_alertdialog_signin_request_false)
+                ,message
                 ,Toast.LENGTH_SHORT).show();
         startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
                 .setProviders(AuthUI.EMAIL_PROVIDER,
@@ -454,10 +454,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        if (progressBar!=null){
-            progressBar.dismiss();
-        }
+        this.finishAffinity();
+        System.exit(0);
+
     }
 /**
     @Override
@@ -576,18 +575,25 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        if (progressBar!=null){
-            progressBar.dismiss();
-        }
+       dismissProgressbar();
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
+    private void showProgressbar(){
         progressBar = new ProgressDialog(this);
         progressBar.setCancelable(false);
         progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressBar.show();
+    }
+
+    private void dismissProgressbar(){
+        if (progressBar!=null){
+            progressBar.dismiss();
+        }
+    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+
     }
 }
 

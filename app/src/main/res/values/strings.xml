@@ -7,7 +7,7 @@
     <string name="facebook_application_id" translatable="false">1007941252650277</string>
     <string name="facebook_login_protocol_scheme" translatable="false">fb1007941252650277</string>
     <string name="facebook_provider_id" translatable="false">facebook.com</string>
-    <string name="password_provider_id">password</string>
+    <string name="password_provider_id" translatable="false">password</string>
     password
 
     <string name="action_settings">Settings</string>
@@ -60,6 +60,20 @@
     </array>
 
 
+    // for paths in firebase mainpage (all in english)
+    <array name="categories_arrays_create_mainpage">
+        <item>All Publications</item>
+        <item>Electronics</item>
+        <item>Cars and Motors</item>
+        <item>Fashion and Accessories</item>
+        <item>Baby and Child</item>
+        <item>Sport, Leisure and Games</item>
+        <item>Services</item>
+        <item>Home and Garden</item>
+        <item>Movies, Books and Music</item>
+        <item>Pets and Accessories</item>
+        <item>Others</item>
+    </array>
     // categories
 
     <string name="categories_post_electronic">Electronics</string>
@@ -109,6 +123,7 @@
 
 
     <array name="categories_array_activity">
+        <item>All Publications</item>
         <item>Electronics</item>
         <item>Cars and Motors</item>
         <item>Fashion and Accessories</item>
@@ -260,5 +275,22 @@
     <string name="alertDialogdeleteAccount">Delete this account permanently?</string>
     <string name="alertDialogdeleteAccountMessage">All your data and publications will be lost.</string>
     <string name="button_delete_Account">Delete my account</string>
+    <string name="connection_to_server_cancelled">connection to server cancelled</string>
+    <string name="title_activity_delete_account">Delete Account</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password (optional)</string>
+    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="permission_rationale">"Contacts permissions are needed for providing email
+        completions."
+    </string>
+    <string name="string_button_delete_account">Delete  my account</string>
+    <string name="spinner_toolbar_all_categories_tag">All Cities</string>
 
 </resources>

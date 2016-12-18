@@ -30,6 +30,11 @@
 
             android:id="@+id/imageView_user_profile" />
 
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/progress_bar_user_profile"/>
+
         <Button
             android:layout_width="wrap_content"
             android:layout_height="40dp"

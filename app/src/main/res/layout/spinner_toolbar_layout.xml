@@ -1,12 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="50dp"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:gravity="center"
-    android:text="Sample Text"
-    android:paddingBottom="5dp"
-    android:textSize="15sp"
-    android:paddingTop="5dp"
-    android:background="@color/colorPrimary">
+    android:paddingBottom="1dp"
+    android:orientation="vertical">
 
-</TextView>
+    <TextView
+        android:layout_height="25dp"
+        android:layout_width="match_parent"
+        android:layout_alignParentTop="true"
+        android:text="Sample Text"
+        android:gravity="center_horizontal"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:textColor="@color/white"
+        android:background="@color/colorPrimary"
+        android:id="@+id/textView_category_toolbar"/>
+
+
+    <TextView
+        android:layout_height="17dp"
+        android:layout_width="match_parent"
+        android:text="Sample Text"
+        android:gravity="center_horizontal"
+        android:textSize="12sp"
+        android:textColor="@color/white"
+        android:background="@color/colorPrimary"
+        android:layout_below="@+id/textView_category_toolbar"
+        android:id="@+id/textView_category_toolbar_city"/>
+
+</RelativeLayout>

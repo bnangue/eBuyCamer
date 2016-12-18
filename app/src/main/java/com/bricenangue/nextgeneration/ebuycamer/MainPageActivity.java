@@ -1,6 +1,7 @@
 package com.bricenangue.nextgeneration.ebuycamer;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -10,11 +11,14 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -98,7 +102,7 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
 
         }
 
-        categoriesArray=getResources().getStringArray(R.array.categories_arrays_create);
+        categoriesArray=getResources().getStringArray(R.array.categories_arrays_create_mainpage);
         auth=FirebaseAuth.getInstance();
         toolbar=(Toolbar)findViewById(R.id.toolbar);
 
@@ -113,10 +117,19 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
         }else {
             startActivity(new Intent(MainPageActivity.this,MainActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            finish();
 
         }
-        root= FirebaseDatabase.getInstance().getReference()
-                .child(ConfigApp.FIREBASE_APP_URL_REGIONS).child(locationName).child(categoriesArray[positionSpinner]);
+        if (categoriesArray[positionSpinner].equals("All Publications")) {
+            root= FirebaseDatabase.getInstance().getReference()
+                    .child(ConfigApp.FIREBASE_APP_URL_USERS_POSTS);
+
+        }else{
+            root= FirebaseDatabase.getInstance().getReference()
+                    .child(ConfigApp.FIREBASE_APP_URL_REGIONS).child(locationName).child(categoriesArray[positionSpinner]);
+        }
+
+
 
         setSupportActionBar(toolbar);
        getSupportActionBar().setTitle(null);
@@ -150,9 +163,12 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
         final ArrayAdapter spinnerAdapter = ArrayAdapter.createFromResource(getSupportActionBar().getThemedContext(),
                 R.array.categories_array_activity, R.layout.spinner_toolbar_layout);
 
+        CustomSpinnerAdapter customSpinnerAdapter=new CustomSpinnerAdapter(this
+                ,getResources().getStringArray(R.array.categories_array_activity),locationName);
+
         spinnerToolbar = new Spinner(getSupportActionBar().getThemedContext());
 
-        spinnerToolbar.setAdapter(spinnerAdapter);
+        spinnerToolbar.setAdapter(customSpinnerAdapter);
         spinnerToolbar.setSelection(positionSpinner);
 
         spinnerToolbar.setOnItemSelectedListener(this);
@@ -170,8 +186,8 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
                         .putExtra("categorie",model.getPrivateContent().getCategorie().getName()));
 
                 DatabaseReference root= FirebaseDatabase.getInstance().getReference()
-                        .child(ConfigApp.FIREBASE_APP_URL_REGIONS).child(locationName)
-                        .child(categoriesArray[spinnerToolbar.getSelectedItemPosition()]);
+                        .child(ConfigApp.FIREBASE_APP_URL_REGIONS).child(model.getPrivateContent().getLocation().getName())
+                        .child(categoriesArray[model.getPrivateContent().getCategorie().getCatNumber()+1]);
 
                 updateViewer(root.child(model.getPrivateContent().getUniquefirebaseId())
                                 .child("publicContent"),
@@ -189,25 +205,25 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
 
     private int getPosition(String categorie){
         if(categorie.equals(getString(R.string.categories_post_electronic))){
-            return 0;
-        }else if (categorie.equals(getString(R.string.categories_post_cars_and_motors))){
             return 1;
-        }else if (categorie.equals(getString(R.string.categories_post_fashion_accessoire))){
+        }else if (categorie.equals(getString(R.string.categories_post_cars_and_motors))){
             return 2;
-        }else if (categorie.equals(getString(R.string.categories_post_baby_child))){
+        }else if (categorie.equals(getString(R.string.categories_post_fashion_accessoire))){
             return 3;
-        }else if (categorie.equals(getString(R.string.categories_post_sport_leisure))){
+        }else if (categorie.equals(getString(R.string.categories_post_baby_child))){
             return 4;
-        }else if (categorie.equals(getString(R.string.categories_post_services))){
+        }else if (categorie.equals(getString(R.string.categories_post_sport_leisure))){
             return 5;
-        }else if (categorie.equals(getString(R.string.categories_post_home_garden))){
+        }else if (categorie.equals(getString(R.string.categories_post_services))){
             return 6;
-        }else if (categorie.equals(getString(R.string.categories_post_movies_books))){
+        }else if (categorie.equals(getString(R.string.categories_post_home_garden))){
             return 7;
-        }else if (categorie.equals(getString(R.string.categories_post_pets_accessoire))){
+        }else if (categorie.equals(getString(R.string.categories_post_movies_books))){
             return 8;
-        }else {
+        }else if (categorie.equals(getString(R.string.categories_post_pets_accessoire))){
             return 9;
+        }else {
+            return 10;
         }
 
     }
@@ -225,7 +241,7 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
 
         switch (item.getItemId()){
             case R.id.action_refresh_mainpage :
-                fetchPost(categoriesArray[spinnerToolbar.getSelectedItemPosition()]);
+                fetchPost(spinnerToolbar.getSelectedItemPosition());
                 return true;
             case R.id.action_logout:
               loggout();
@@ -275,7 +291,9 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
                     public void onClick(DialogInterface dialogInterface, int i) {
                         auth.signOut();
                         startActivity(new Intent(MainPageActivity.this,MainActivity.class)
-                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                        Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                        Intent.FLAG_ACTIVITY_NEW_TASK));
                         finish();
                     }
                 });
@@ -294,16 +312,27 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
     }
 
 
-    private void fetchPost(String postcategory){
+    private void fetchPost(int position){
+
         data.clear();
         progressBar = new ProgressDialog(this);
         progressBar.setCancelable(false);
         progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         progressBar.show();
-        final Query reference= FirebaseDatabase.getInstance().getReference()
-                .child(ConfigApp.FIREBASE_APP_URL_REGIONS)
-                .child(locationName)
-                .child(postcategory).limitToLast(1000);
+        final Query reference;
+
+        if(position==0){
+            reference= FirebaseDatabase.getInstance().getReference()
+                    .child(ConfigApp.FIREBASE_APP_URL_USERS_POSTS)
+                    .limitToLast(1000);
+
+        }else {
+            reference= FirebaseDatabase.getInstance().getReference()
+                    .child(ConfigApp.FIREBASE_APP_URL_REGIONS)
+                    .child(locationName)
+                    .child(categoriesArray[position]).limitToLast(1000);
+
+        }
 
 
         reference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -354,7 +383,7 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
 
         category=spinnerToolbar.getSelectedItem().toString();
-        fetchPost(categoriesArray[i]);
+        fetchPost(i);
     }
 
     @Override
@@ -465,6 +494,54 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
             case R.id.button_go_to_setting:
                 startActivity(new Intent(MainPageActivity.this,SettingsActivity.class));
                 break;
+        }
+    }
+
+
+     class CustomSpinnerAdapter extends BaseAdapter {
+        Context context;
+        String[] categoriesNames;
+        LayoutInflater inflter;
+         private String cityname;
+
+        public CustomSpinnerAdapter(Context applicationContext
+                , String[] categoriesNames, String cityname) {
+            this.context = applicationContext;
+            this.categoriesNames = categoriesNames;
+            inflter = (LayoutInflater.from(applicationContext));
+            this.cityname=cityname;
+        }
+
+        @Override
+        public int getCount() {
+            return categoriesNames.length;
+        }
+
+        @Override
+        public Object getItem(int i) {
+            return categoriesNames[i];
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return 0;
+        }
+
+        @Override
+        public View getView(int i, View view, ViewGroup viewGroup) {
+            view = inflter.inflate(R.layout.spinner_toolbar_layout, null);
+            TextView categroy = (TextView) view.findViewById(R.id.textView_category_toolbar);
+            TextView city = (TextView) view.findViewById(R.id.textView_category_toolbar_city);
+            if(i!=0){
+                city.setText(cityname);
+                categroy.setText(categoriesNames[i]);
+            }else {
+                city.setVisibility(View.GONE);
+                city.setText(context.getString(R.string.spinner_toolbar_all_categories_tag));
+                categroy.setText(categoriesNames[i]);
+            }
+
+            return view;
         }
     }
 }

@@ -265,11 +265,11 @@
                             android:layout_height="wrap_content"
                             android:orientation="horizontal">
                             <ImageView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
+                                android:layout_width="65dp"
+                                android:layout_height="65dp"
                                 app:srcCompat="@drawable/com_facebook_profile_picture_blank_square"
                                 android:layout_marginLeft="5dp"
-                                android:scaleType="centerInside"
+                                android:scaleType="fitCenter"
                                 android:adjustViewBounds="true"
                                 android:id="@+id/imageView_viewcontent_userpic"
                                 />

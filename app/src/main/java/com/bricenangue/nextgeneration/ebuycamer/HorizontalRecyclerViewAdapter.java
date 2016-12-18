@@ -80,7 +80,6 @@ public class HorizontalRecyclerViewAdapter  extends RecyclerView.Adapter<Horizon
 
         if(uris.get(holder.getAdapterPosition()).toString().contains("firebasestorage")){
             Picasso.with(context).load(uris.get(holder.getAdapterPosition())).networkPolicy(NetworkPolicy.OFFLINE)
-                    .fit()
                     .into(holder.profilaePicture, new Callback() {
                         @Override
                         public void onSuccess() {
@@ -90,7 +89,7 @@ public class HorizontalRecyclerViewAdapter  extends RecyclerView.Adapter<Horizon
                         @Override
                         public void onError() {
                             Picasso.with(context).load(uris.get(holder.getAdapterPosition()))
-                                    .fit().into(holder.profilaePicture);
+                                    .into(holder.profilaePicture);
                             holder.progressBar.setVisibility(View.GONE);
 
                         }

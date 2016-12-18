@@ -1,6 +1,7 @@
 package com.bricenangue.nextgeneration.ebuycamer;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -9,6 +10,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -22,6 +25,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -46,20 +50,28 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
     private TextView textViewWelcomeUser;
     private String userDisplayedname;
     private boolean getuserlocation=false;
-
+    FirebaseUser user;
+    private UserSharedPreference userSharedPreference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_locations);
 
+        userSharedPreference=new UserSharedPreference(this);
         recyclerView=(RecyclerView) findViewById(R.id.recyclerview_locations);
 
         auth=FirebaseAuth.getInstance();
         if (auth.getCurrentUser()==null){
 
+            startActivity(new Intent(LocationsActivity.this,MainActivity.class)
+                    .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                            Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                            Intent.FLAG_ACTIVITY_NEW_TASK));
+            finish();
         }else {
             userDisplayedname=auth.getCurrentUser().getDisplayName();
+            user=auth.getCurrentUser();
 
         }
 
@@ -75,6 +87,7 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
         setSupportActionBar(toolbar);
 
 
+        userSharedPreference.storeUserLocation(null);
         root= FirebaseDatabase.getInstance().getReference();
 
         recyclerView=(RecyclerView)findViewById(R.id.recyclerview_locations);
@@ -91,6 +104,8 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
             public void onItemClick(final int position, View v) {
 
                 if(getuserlocation){
+                    userSharedPreference.storeUserLocation(locations_list.get(position));
+
                     root.child(ConfigApp.FIREBASE_APP_URL_USERS).child(auth.getCurrentUser().getUid())
                             .child("userPublic").child("Location").setValue(new Locations(locations_list.get(position)))
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -104,6 +119,7 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
                             });
 
                 }else {
+                    userSharedPreference.storeUserLocation(locations_list.get(position));
                     root.child(ConfigApp.FIREBASE_APP_URL_USERS).child(auth.getCurrentUser().getUid())
                             .child("userPublic").child("Location").setValue(new Locations(locations_list.get(position)));
                     startActivity(new Intent(LocationsActivity.this,CategoryActivity.class)
@@ -130,6 +146,71 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
 
     @Override
     public void onClick(View view) {
+
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_locations,menu);
+        return super.onCreateOptionsMenu(menu);
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()){
+
+            case R.id.action_logout_location:
+                loggout();
+                return true;
+            case R.id.action_settings_location:
+                startActivity(new Intent(LocationsActivity.this,SettingsActivity.class));
+                return true;
+
+            case R.id.action_add_new_location:
+
+                return true;
+
+
+        }
+
+        return super.onOptionsItemSelected(item);
+
+    }
+
+
+
+    private void loggout() {
+
+        final AlertDialog alertDialog =
+                new AlertDialog.Builder(LocationsActivity.this).setMessage(
+                        getString(R.string.alertDialoglogout)+" " +user.getEmail())
+                        .create();
+        alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.button_cancel)
+                , new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        alertDialog.dismiss();
+
+                    }
+
+                });
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.button_logout)
+                , new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        auth.signOut();
+                        startActivity(new Intent(LocationsActivity.this,MainActivity.class)
+                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                        );
+                        finish();
+                    }
+                });
+        alertDialog.setCancelable(false);
+        alertDialog.show();
 
     }
 

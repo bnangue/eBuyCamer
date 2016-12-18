@@ -1,17 +1,22 @@
 package com.bricenangue.nextgeneration.ebuycamer;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,6 +33,7 @@ public class CategoryActivity extends AppCompatActivity implements View.OnClickL
     private String location;
     private ArrayList<String> categories =new ArrayList<>();
     private UserSharedPreference userSharedPreference;
+    private FirebaseUser user;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +48,9 @@ public class CategoryActivity extends AppCompatActivity implements View.OnClickL
         if(auth==null){
             startActivity(new Intent(CategoryActivity.this,MainActivity.class)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            finish();
+        }else {
+            user=auth.getCurrentUser();
         }
 
         toolbar=(Toolbar)findViewById(R.id.toolbar_category_activity);
@@ -116,6 +125,80 @@ public class CategoryActivity extends AppCompatActivity implements View.OnClickL
 
                 break;
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_category_activity,menu);
+        return super.onCreateOptionsMenu(menu);
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()){
+
+            case R.id.action_logout_category:
+                loggout();
+                return true;
+            case R.id.action_settings_category:
+                startActivity(new Intent(CategoryActivity.this,SettingsActivity.class));
+                return true;
+
+            case R.id.action_user_profile_category:
+
+                startActivity(new Intent(CategoryActivity.this,UserProfileActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                return true;
+
+            case R.id.action_check_location_category:
+                userSharedPreference.storeUserLocation(null);
+                startActivity(new Intent(CategoryActivity.this,LocationsActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                finish();
+                return true;
+
+
+        }
+
+        return super.onOptionsItemSelected(item);
+
+    }
+
+
+
+    private void loggout() {
+
+        final AlertDialog alertDialog =
+                new AlertDialog.Builder(CategoryActivity.this).setMessage(
+                        getString(R.string.alertDialoglogout)+" " +user.getEmail())
+                        .create();
+        alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.button_cancel)
+                , new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        alertDialog.dismiss();
+
+                    }
+
+                });
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.button_logout)
+                , new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        auth.signOut();
+                        startActivity(new Intent(CategoryActivity.this,MainActivity.class)
+                                .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                        Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                        Intent.FLAG_ACTIVITY_NEW_TASK)
+                               );
+                        finish();
+                    }
+                });
+        alertDialog.setCancelable(false);
+        alertDialog.show();
+
     }
 
 }

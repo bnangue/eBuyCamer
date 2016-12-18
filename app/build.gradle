@@ -7,8 +7,8 @@ android {
         applicationId "com.bricenangue.nextgeneration.ebuycamer"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "1.0.02"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 
@@ -67,6 +67,7 @@ dependencies {
     compile 'com.google.firebase:firebase-auth:10.0.0'
     compile 'com.google.firebase:firebase-storage:10.0.0'
     compile 'com.google.firebase:firebase-messaging:10.0.0'
+    compile 'com.google.firebase:firebase-crash:10.0.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile 'com.squareup.okhttp3:okhttp:3.5.0'
     compile 'com.android.support:design:25.1.0'

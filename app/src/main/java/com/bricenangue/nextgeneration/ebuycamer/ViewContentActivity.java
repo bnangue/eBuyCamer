@@ -409,7 +409,7 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
     private void populate(Publication publication) {
 
         textView_title.setText(publication.getPrivateContent().getTitle());
-        textView_category.setText(categoriesArray[publication.getPrivateContent().getCategorie().getCatNumber()]);
+        textView_category.setText(categoriesArray[publication.getPrivateContent().getCategorie().getCatNumber() + 1]);
         if (publication.getPrivateContent().getDescription() != null) {
             textView_description.setText(publication.getPrivateContent().getDescription());
         } else {
@@ -505,7 +505,7 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
 
 
         // if no picture check if facebook picture avialable
-        if (!loaded) {
+        if (!loaded && publication.getPrivateContent().getCreatorid().equals(user.getUid())) {
             String facebookUserId = "";
             // find the Facebook profile and get the user's id
             for (UserInfo profile : user.getProviderData()) {
@@ -542,7 +542,7 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
 
     private void loadPicture(final String photoUrl) {
         Picasso.with(getApplicationContext()).load(photoUrl).networkPolicy(NetworkPolicy.OFFLINE)
-                .fit().centerInside()
+
                 .into(imageView_userPhoto, new Callback() {
                     @Override
                     public void onSuccess() {
@@ -554,7 +554,7 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
                     @Override
                     public void onError() {
                         Picasso.with(getApplicationContext()).load(photoUrl)
-                                .fit().centerInside().into(imageView_userPhoto);
+                                .into(imageView_userPhoto);
 
                         if (progressBar != null) {
                             progressBar.dismiss();

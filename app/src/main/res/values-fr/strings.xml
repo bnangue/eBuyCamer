@@ -28,7 +28,6 @@
     <string name="mainpage_error_while_loading_data">Une erreur est survenue lors du téléchargement des données.</string>
     <string name="mainpage_no_item_at_location">Il n\'y a aucun objet en vente dans cette ville présentement. Essayez une ville voisine!</string>
     <string name="mainpage_toast_loggingAs">Vous êtes connecté en tant que</string>
-    <string name="password_provider_id">Mot de passe</string>
     <string name="pick_image_intent_text">Choisissez une image</string>
     <string name="pref_description_social_recommendations">Recommandation des personnes à contacter</string>
     <string name="pref_header_data_sync">Donnés et amp; synchroniser</string>
@@ -89,6 +88,21 @@
     </array>
 
 
+    // for paths in firebase mainpage (all in english)
+    <array name="categories_arrays_create_mainpage">
+        <item>All Publications</item>
+        <item>Electronics</item>
+        <item>Cars and Motors</item>
+        <item>Fashion and Accessories</item>
+        <item>Baby and Child</item>
+        <item>Sport, Leisure and Games</item>
+        <item>Services</item>
+        <item>Home and Garden</item>
+        <item>Movies, Books and Music</item>
+        <item>Pets and Accessories</item>
+        <item>Others</item>
+    </array>
+
 
     <array name="currency">
         <item>FCFA</item>
@@ -118,6 +132,7 @@
 
 
     <array name="categories_array_activity">
+        <item>Toutes les Publications</item>
         <item>Électronique</item>
         <item>Voitures et Moteurs</item>
         <item>Mode et Accéssoires</item>
@@ -189,5 +204,18 @@
     <string name="alertDialogdeleteAccountMessage">Tous vos données et publications seront perdues</string>
     <string name="button_delete_Account">Supprimer mon compte</string>
     <string name="action_delete_account">Supprimer mon compte</string>
+    <string name="permission_rationale">La permission pour lire les contactes est requise pour accéder à l\'e-mail</string>
+    <string name="title_activity_delete_account">Supprimer le Compte</string>
+    <string name="string_button_delete_account">Supprimer mon compte</string>
+    <string name="prompt_password">Mot de passe</string>
+    <string name="prompt_email">E-mail</string>
+    <string name="action_sign_in_short">Se connecter</string>
+    <string name="action_sign_in">Se connecter ou s\'enrégistrer</string>
+    <string name="connection_to_server_cancelled">La connexion au serveur a été annulé</string>
+    <string name="error_field_required">à remplire</string>
+    <string name="error_incorrect_password">Ce mot de passe est incorrect</string>
+    <string name="error_invalid_email">Cette adrèsse e-mail est invalide</string>
+    <string name="error_invalid_password">Ce mot de passe est trop court</string>
+    <string name="spinner_toolbar_all_categories_tag">Toutes les Villes</string>
 
 </resources>
