@@ -2,14 +2,18 @@ package com.bricenangue.nextgeneration.ebuycamer;
 
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.facebook.FacebookSdk;
@@ -32,11 +36,15 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -45,8 +53,28 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference root;
     private StorageReference storageRoot;
     private UserSharedPreference userSharedPreference;
-    private ProgressDialog progressBar;
+    private ProgressBar progressBar;
     private FirebaseUser user;
+
+
+    public boolean haveNetworkConnection() {
+        boolean haveConnectedWifi = false;
+        boolean haveConnectedMobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo ni : netInfo) {
+            if ( "WIFI".equals(ni.getTypeName()))
+                if (ni.isConnected())
+                    haveConnectedWifi = true;
+            if ("MOBILE".equals(ni.getTypeName()))
+                if (ni.isConnected())
+                    haveConnectedMobile = true;
+        }
+        return haveConnectedWifi || haveConnectedMobile;
+    }
+
+
 
 
     @Override
@@ -57,82 +85,133 @@ public class MainActivity extends AppCompatActivity {
 
         userSharedPreference=new UserSharedPreference(this);
 
-        GoogleApiAvailability api = GoogleApiAvailability.getInstance();
-        int code = api.isGooglePlayServicesAvailable(this);
-        if (code == ConnectionResult.SUCCESS) {
-            // Do Your Stuff Here
+        progressBar=(ProgressBar)findViewById(R.id.progress_bar_main_activity);
 
-            auth =FirebaseAuth.getInstance();
-            root=FirebaseDatabase.getInstance().getReference();
-            storageRoot=FirebaseStorage.getInstance().getReference();
-            showProgressbar();
-
-            if(auth!=null){
+            if (haveNetworkConnection()){
                 showProgressbar();
-                user=auth.getCurrentUser();
-                if(user != null ){
-                    //user logged in
+                GoogleApiAvailability api = GoogleApiAvailability.getInstance();
+                int code = api.isGooglePlayServicesAvailable(this);
 
-                    List<? extends UserInfo> list=user.getProviderData();
-                    String providerId=list.get(1).getProviderId();
+                if (code == ConnectionResult.SUCCESS) {
+                    auth =FirebaseAuth.getInstance();
+                    root=FirebaseDatabase.getInstance().getReference();
+                    storageRoot=FirebaseStorage.getInstance().getReference();
 
-                    if(providerId.equals(getString(R.string.facebook_provider_id))) {
 
-                        procide(user);
+                    if(auth!=null){
+                        showProgressbar();
+                        user=auth.getCurrentUser();
+                        if(user != null ){
+                            //user logged in
 
-                    }else if (providerId.equals(getString(R.string.password_provider_id))
-                            && user.isEmailVerified()){
+                            List<? extends UserInfo> list=user.getProviderData();
+                            String providerId=list.get(1).getProviderId();
 
-                        procide(user);
+                            if(providerId.equals(getString(R.string.facebook_provider_id))) {
 
-                    }else if (providerId.equals(getString(R.string.password_provider_id))
-                            && !user.isEmailVerified()) {
+                                procide(user);
 
-                        verifyMail(user);
+                            }else if (providerId.equals(getString(R.string.password_provider_id))
+                                    && user.isEmailVerified()){
+
+                                procide(user);
+
+                            }else if (providerId.equals(getString(R.string.password_provider_id))
+                                    && !user.isEmailVerified()) {
+
+                                verifyMail(user);
+                            }else {
+                                auth.signOut();
+                                dismissProgressbar();
+                                startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
+                                        .setProviders(AuthUI.EMAIL_PROVIDER,
+                                                AuthUI.FACEBOOK_PROVIDER)
+                                        .setIsSmartLockEnabled(!BuildConfig.DEBUG)
+                                        .setTheme(R.style.AppTheme)
+                                        .build(),FB_SIGN_IN);
+
+                            }
+
+
+                        }else {
+
+                            dismissProgressbar();
+
+                            startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
+                                    .setProviders(AuthUI.EMAIL_PROVIDER,
+                                            AuthUI.FACEBOOK_PROVIDER)
+                                    .setIsSmartLockEnabled(!BuildConfig.DEBUG)
+                                    .setTheme(R.style.AppTheme)
+                                    .build(),FB_SIGN_IN);
+                        }
                     }else {
-                        auth.signOut();
                         dismissProgressbar();
+
                         startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
                                 .setProviders(AuthUI.EMAIL_PROVIDER,
                                         AuthUI.FACEBOOK_PROVIDER)
                                 .setIsSmartLockEnabled(!BuildConfig.DEBUG)
                                 .setTheme(R.style.AppTheme)
                                 .build(),FB_SIGN_IN);
-
                     }
-
 
                 }else {
 
-                    dismissProgressbar();
-
-                    startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
-                            .setProviders(AuthUI.EMAIL_PROVIDER,
-                                    AuthUI.FACEBOOK_PROVIDER)
-                            .setIsSmartLockEnabled(!BuildConfig.DEBUG)
-                            .setTheme(R.style.AppTheme)
-                            .build(),FB_SIGN_IN);
+                    Dialog dialog = GooglePlayServicesUtil.getErrorDialog(code, this, 0);
+                    if (dialog != null) {
+                        //This dialog will help the user update to the latest GooglePlayServices
+                        dialog.show();
+                    }
+                    if (new ConfigApp(this).haveNetworkConnection()){
+                        if (dialog!=null){
+                            dialog.dismiss();
+                        }
+                    }
                 }
+
             }else {
-                dismissProgressbar();
 
-                startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
-                        .setProviders(AuthUI.EMAIL_PROVIDER,
-                                AuthUI.FACEBOOK_PROVIDER)
-                        .setIsSmartLockEnabled(!BuildConfig.DEBUG)
-                        .setTheme(R.style.AppTheme)
-                        .build(),FB_SIGN_IN);
+               if(userSharedPreference.getUserLoggedIn()){
+                   dismissProgressbar();
+                   noConnectionContinue();
+               }else {
+                   dismissProgressbar();
+
+                   startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
+                           .setProviders(AuthUI.EMAIL_PROVIDER,
+                                   AuthUI.FACEBOOK_PROVIDER)
+                           .setIsSmartLockEnabled(!BuildConfig.DEBUG)
+                           .setTheme(R.style.AppTheme)
+                           .build(),FB_SIGN_IN);
+               }
             }
-        } else {
-
-            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(code, this, 0);
-            if (dialog != null) {
-                //This dialog will help the user update to the latest GooglePlayServices
-                dialog.show();
 
 
-            }
-        }
+
+    }
+
+    private void noConnectionContinue() {
+
+        final AlertDialog alertDialog =
+                new AlertDialog.Builder(MainActivity.this).setTitle(
+                        getString(R.string.alertDialog_no_internet_connection))
+                        .setIcon(getResources().getDrawable(R.drawable.ic_warning_black_24dp))
+                        .setMessage(getString(R.string.alertDialog_no_internet_connection_message))
+                        .create();
+
+        alertDialog.setButton(DialogInterface.BUTTON_POSITIVE, getString(R.string.button_continue)
+                , new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        alertDialog.dismiss();
+                        startActivity(new Intent(MainActivity.this,CategoryActivity.class)
+                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                        finish();
+                        dismissProgressbar();
+                    }
+                });
+        alertDialog.setCancelable(false);
+        alertDialog.show();
 
     }
 
@@ -140,14 +219,24 @@ public class MainActivity extends AppCompatActivity {
         final DatabaseReference ref=root.child(ConfigApp.FIREBASE_APP_URL_USERS).
                 child(user.getUid()).child("userPublic")
                 ;
+       // ref.child("chatId").setValue(FirebaseInstanceId.getInstance().getToken());
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
                 userSharedPreference.setUserNumberofAds(dataSnapshot
                         .child("numberOfAds").getValue(long.class));
-                ref.child("name").setValue(user.getDisplayName());
+
+                userSharedPreference.storeUserData(dataSnapshot.getValue(UserPublic.class));
+                userSharedPreference.setUserLoggedIn(true);
+
+                //ref.child("name").setValue(user.getDisplayName());
+
                 if (dataSnapshot.hasChild("Location")){
-                    userSharedPreference.storeUserLocation(dataSnapshot.child("Location").getValue(Locations.class).getName());
+
+                    userSharedPreference.storeUserLocation(dataSnapshot.child("Location")
+                            .getValue(Locations.class).getName()
+                            , dataSnapshot.child("Location").getValue(Locations.class).getNumberLocation());
                     startActivity(new Intent(MainActivity.this,CategoryActivity.class)
                             .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
                     finish();
@@ -166,7 +255,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCancelled(DatabaseError databaseError) {
                 dismissProgressbar();
-                Toast.makeText(getApplicationContext(),databaseError.getMessage() + "ici"
+                Toast.makeText(getApplicationContext(),databaseError.getMessage()
                 ,Toast.LENGTH_SHORT).show();
 
             }
@@ -186,6 +275,7 @@ public class MainActivity extends AppCompatActivity {
                         //user.sendEmailVerification();
 
                        procide(user);
+                        user.sendEmailVerification();
                         alertDialog.dismiss();
                         dismissProgressbar();
 
@@ -259,6 +349,8 @@ public class MainActivity extends AppCompatActivity {
 
                 userfb.setUniquefirebasebId(uid);
 
+                Map<String,Object> children=new HashMap<>();
+
                 DatabaseReference refAds=root.child(ConfigApp.FIREBASE_APP_URL_USERS_POSTS_USER).child(user.getUid());
                 final boolean finalIsfacebook = isfacebook;
                 final boolean finalIspassword = ispassword;
@@ -267,14 +359,24 @@ public class MainActivity extends AppCompatActivity {
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             //user already register
                             if(dataSnapshot.hasChildren()){
+
                                 userfb.setNumberOfAds(dataSnapshot.getChildrenCount());
                                 userSharedPreference.setUserNumberofAds(dataSnapshot.getChildrenCount());
+
                                 final DatabaseReference refUSerPublice=ref.child("userPublic");
+
                                 refUSerPublice.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
                                         if(dataSnapshot.hasChildren()){
-                                            refUSerPublice.setValue(userfb).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            Map<String,Object> children=new HashMap<>();
+                                            children.put("/email",userfb.getEmail());
+                                            children.put("/name",userfb.getName());
+                                            children.put("/numberOfAds",userfb.getNumberOfAds());
+                                            children.put("/uniquefirebasebId",userfb.getUniquefirebasebId());
+                                            children.put("/chatId",FirebaseInstanceId.getInstance().getToken());
+
+                                            refUSerPublice.updateChildren(children).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if(task.isComplete() && task.isSuccessful()){
@@ -296,7 +398,14 @@ public class MainActivity extends AppCompatActivity {
                                                 }
                                             });
                                         }else {
-                                            refUSerPublice.setValue(userfb).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            Map<String,Object> children=new HashMap<>();
+                                            children.put("/email",userfb.getEmail());
+                                            children.put("/name",userfb.getName());
+                                            children.put("/numberOfAds",userfb.getNumberOfAds());
+                                            children.put("/uniquefirebasebId",userfb.getUniquefirebasebId());
+                                            children.put("/chatId",FirebaseInstanceId.getInstance().getToken());
+
+                                            refUSerPublice.updateChildren(children).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if(task.isComplete() && task.isSuccessful()){
@@ -343,7 +452,14 @@ public class MainActivity extends AppCompatActivity {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
                                         if(dataSnapshot.hasChildren()){
-                                            refUSerPublice.setValue(userfb).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            Map<String,Object> children=new HashMap<>();
+                                            children.put("/email",userfb.getEmail());
+                                            children.put("/name",userfb.getName());
+                                            children.put("/numberOfAds",userfb.getNumberOfAds());
+                                            children.put("/uniquefirebasebId",userfb.getUniquefirebasebId());
+                                            children.put("/chatId",FirebaseInstanceId.getInstance().getToken());
+
+                                            refUSerPublice.updateChildren(children).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if(task.isComplete() && task.isSuccessful()){
@@ -365,7 +481,14 @@ public class MainActivity extends AppCompatActivity {
                                                 }
                                             });
                                         }else {
-                                            refUSerPublice.setValue(userfb).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            Map<String,Object> children=new HashMap<>();
+                                            children.put("/email",userfb.getEmail());
+                                            children.put("/name",userfb.getName());
+                                            children.put("/numberOfAds",userfb.getNumberOfAds());
+                                            children.put("/uniquefirebasebId",userfb.getUniquefirebasebId());
+                                            children.put("/chatId",FirebaseInstanceId.getInstance().getToken());
+
+                                            refUSerPublice.updateChildren(children).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<Void> task) {
                                                     if(task.isComplete() && task.isSuccessful()){
@@ -579,15 +702,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showProgressbar(){
-        progressBar = new ProgressDialog(this);
-        progressBar.setCancelable(false);
-        progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressBar.show();
+        progressBar.setVisibility(View.VISIBLE);
     }
 
     private void dismissProgressbar(){
         if (progressBar!=null){
-            progressBar.dismiss();
+            progressBar.setVisibility(View.GONE);
         }
     }
     @Override
@@ -595,5 +715,25 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
     }
+
+
+    private void procideOffline() {
+        dismissProgressbar();
+        Toast.makeText(getApplicationContext()
+                ,getString(R.string.connection_to_server_not_aviable)
+                ,Toast.LENGTH_SHORT).show();
+        if(userSharedPreference.getLoggedInUser()!=null && userSharedPreference.getUserLocation()!=null){
+            startActivity(new Intent(MainActivity.this,CategoryActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            finish();
+            dismissProgressbar();
+        }else {
+            startActivity(new Intent(MainActivity.this,LocationsActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            finish();
+            dismissProgressbar();
+        }
+    }
+
 }
 

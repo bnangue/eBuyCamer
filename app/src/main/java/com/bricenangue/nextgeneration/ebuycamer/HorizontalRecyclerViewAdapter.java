@@ -1,8 +1,11 @@
 package com.bricenangue.nextgeneration.ebuycamer;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -94,12 +97,16 @@ public class HorizontalRecyclerViewAdapter  extends RecyclerView.Adapter<Horizon
 
                         }
                     });
+            //holder.profilaePicture.setImageURI(uris.get(holder.getAdapterPosition()));
 
         }else {
-            holder.progressBar.setVisibility(View.GONE);
-            holder.profilaePicture.setImageURI(uris.get(holder.getAdapterPosition()));
 
         }
+        byte[] decodedString = Base64.decode(uris.get(holder.getAdapterPosition()).toString(), Base64.DEFAULT);
+        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+
+        holder.profilaePicture.setImageBitmap(decodedByte);
+        holder.progressBar.setVisibility(View.GONE);
 
     }
 

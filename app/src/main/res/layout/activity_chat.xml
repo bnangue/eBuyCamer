@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.bricenangue.nextgeneration.ebuycamer.ChatActivity">
+
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:id="@+id/linearLayout_activity_chat_post_activity"
+        android:padding="5dp">
+
+
+            <RelativeLayout
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:id="@+id/imageView_publicationFirstphoto_mydeal_cardview_drawer_layout">
+                <ImageView
+
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_marginLeft="5dp"
+                    android:scaleType="fitCenter"
+                    android:adjustViewBounds="true"
+                    android:id="@+id/imageView_viewcontent_postpic_activity"
+                    />
+                <ImageView
+                    android:id="@+id/imageView_my_favorite_sale_logo_chat"
+                    android:layout_width="15dp"
+                    android:layout_height="15dp"
+                    android:scaleType="centerInside"
+                    android:adjustViewBounds="true"
+                    android:src="@drawable/discount"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                   android:layout_marginBottom="10dp"/>
+            </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="2"
+            android:layout_gravity="end|center"
+            android:gravity="start|center"
+            android:layout_marginLeft="20dp"
+
+            >
+
+            <TextView
+
+                android:text=""
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView_viewcontent_title_activity"
+                android:layout_weight="1"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                />
+
+            <TextView
+                android:text=""
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView_viewcontent_price_activity"
+                android:layout_weight="1"
+                android:textColor="@color/colorgreen"/>
+
+        </LinearLayout>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_keyboard_arrow_right_black_24dp"
+            style="@style/Base.Widget.AppCompat.Button.Borderless"
+            android:id="@+id/arrow_view_post"/>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/divider_linear"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_gravity="bottom"
+        android:background="@color/divider"
+        android:layout_below="@+id/linearLayout_activity_chat_post_activity"/>
+
+    <ListView
+        android:id="@+id/chat_listview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/divider"
+        android:dividerHeight="0dp"
+        android:divider="@null"
+        android:transcriptMode="alwaysScroll"
+        android:layout_below="@+id/divider_linear"/>
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:layout_gravity="bottom"
+        android:background="@color/divider"
+        android:layout_above="@+id/senderContainer"/>
+
+    <ProgressBar
+        android:id="@+id/progress_for_chat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:visibility="gone"/>
+
+    <RelativeLayout
+        android:id="@+id/senderContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+        <EditText
+            android:id="@+id/chat_user_message"
+            android:layout_marginLeft="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#555555"
+            android:textSize="17sp"
+            android:hint="@string/type_your_message"
+            android:gravity="top"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLines="4"
+            android:maxHeight="70dp"
+            android:layout_toStartOf="@+id/sendUserMessage"
+            android:layout_toLeftOf="@+id/sendUserMessage" />
+        <Button
+            android:id="@+id/sendUserMessage"
+            android:layout_marginRight="5dp"
+            android:textColor="#FFFFFF"
+            android:layout_width="72dp"
+            android:layout_height="40dp"
+            android:text="@string/send"
+            android:onClick="sendMessageToFireChat"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            style="@style/button_round"
+            android:layout_centerVertical="true"/>
+    </RelativeLayout>
+
+</RelativeLayout>

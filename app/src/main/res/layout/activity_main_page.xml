@@ -28,6 +28,7 @@
             />
 
 
+
     </LinearLayout>
 
     <android.support.v7.widget.Toolbar
@@ -35,73 +36,68 @@
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
         android:background="@color/colorAccent"
-        android:gravity="center"
+        android:gravity="start"
         android:minHeight="?attr/actionBarSize"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:foregroundGravity="left">
+        >
+
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:orientation="horizontal"
-            android:gravity="left|bottom"
-            android:layout_gravity="left|bottom"
+            android:gravity="center"
+            android:layout_gravity="center"
             android:minHeight="?attr/actionBarSize"
             android:foregroundGravity="left">
 
-            <Button
+            <ImageButton
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:drawableTop="@drawable/ic_add_a_photo_white_18dp"
+                android:adjustViewBounds="true"
+                android:src="@mipmap/ic_add_photo_camera"
                 android:id="@+id/button_create_new_post"
-                android:text="@string/button_toolbar_sell"
-                android:textSize="10sp"
                 style="@style/Base.Widget.AppCompat.Button.Borderless"
-                android:textColor="@color/white"
-                android:textAllCaps="false"
-                android:layout_gravity="start|bottom"
-               />
-            <Button
+                />
+            <ImageButton
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:drawableTop="@drawable/ic_grade_white_18dp"
+                android:src="@mipmap/ic_favorites"
                 android:id="@+id/button_view_favorite"
-                android:text="@string/button_toolbar_my_favorite"
                 style="@style/Base.Widget.AppCompat.Button.Borderless"
-                android:textSize="10sp"
-                android:textColor="@color/white"
-                android:textAllCaps="false"
-                android:layout_gravity="start|bottom"/>
-            <Button
+
+                />
+            <ImageButton
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:drawableTop="@drawable/ic_folder_white_18dp"
+                android:src="@mipmap/ic_folder_white"
                 android:id="@+id/button_view_my_post"
-                android:text="@string/button_toolbar_my_Ads"
                 style="@style/Base.Widget.AppCompat.Button.Borderless"
-                android:textSize="10sp"
-                android:textColor="@color/white"
-                android:textAllCaps="false"
-                android:layout_gravity="start|bottom"/>
-            <Button
+                />
+            <ImageButton
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:drawableTop="@drawable/ic_settings_white_18dp"
-                android:id="@+id/button_go_to_setting"
-                android:text="@string/button_toolbar_settings"
-                android:textSize="10sp"
+                android:src="@mipmap/ic_chat"
+                android:id="@+id/button_go_to_chatting_activity"
                 style="@style/Base.Widget.AppCompat.Button.Borderless"
-                android:textColor="@color/white"
-                android:textAllCaps="false"
-                android:layout_gravity="start|bottom"
+
                 />
 
+
+            <ImageButton
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@mipmap/ic_sale_white"
+                android:id="@+id/button_go_to_sales_activity"
+                style="@style/Base.Widget.AppCompat.Button.Borderless"
+                />
         </LinearLayout>
 
     </android.support.v7.widget.Toolbar>

@@ -54,10 +54,12 @@
 
     </RelativeLayout>
 
+
     <android.support.v4.widget.DrawerLayout
         android:layout_width="match_parent"
 
         android:layout_height="match_parent"
+
         android:layout_above="@+id/relative_layout_viewpager_bottom"
         android:layout_marginBottom="5dp">
 
@@ -133,16 +135,33 @@
                             android:textStyle="bold"
                             android:textSize="20sp"/>
 
-                        <TextView
-                            android:text=""
+                        <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:id="@+id/textView_viewcontent_price"
                             android:layout_weight="1"
-                            android:layout_gravity="end"
-                            android:gravity="end|center_vertical"
-                            android:textSize="18sp"
-                            android:textColor="@color/colorgreen"/>
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/textView_viewcontent_price"
+                                android:layout_gravity="end"
+                                android:gravity="end|center_vertical"
+                                android:textSize="18sp"
+                                android:textColor="@color/colorgreen"/>
+
+                            <TextView
+                                android:layout_marginTop="2dp"
+                                android:text=""
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/textView_viewcontent_price_isnegotiable"
+                                android:layout_gravity="end"
+                                android:gravity="end|center_vertical"
+                                android:textSize="12sp"
+                               />
+
+                        </LinearLayout>
+
                     </LinearLayout>
 
                     <Button
@@ -204,8 +223,10 @@
                             android:layout_height="wrap_content"
                             android:id="@+id/textView_viewcontent_description"
                             android:text=""
-                            android:layout_margin="2dp"
-                            />
+                            android:layout_marginTop="10dp"
+                            android:layout_marginBottom="15dp"
+                            android:layout_marginRight="2dp"
+                            android:layout_marginLeft="2dp"                            />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -260,19 +281,35 @@
                         android:id="@+id/relative_layout_viewpager_viewcontent_user_profile"
                         android:layout_below="@+id/view_viewcontent_separator_time_viewer">
 
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/imageView_viewcontent_user_header"
+                            android:id="@+id/textView_viewcontent_user_header"
+                            android:layout_alignParentTop="true"
+                            android:layout_alignParentStart="true"
+                            android:layout_alignParentLeft="true"
+                            android:layout_marginBottom="5dp"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginStart="5dp"/>
                         <LinearLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="horizontal">
-                            <ImageView
+                            android:orientation="horizontal"
+                            android:layout_below="@+id/textView_viewcontent_user_header">
+
+                            <com.mikhaellopez.circularimageview.CircularImageView
+                                app:civ_border="true"
+                                app:civ_border_width="0dp"
+                                app:civ_border_color="#ffff"
+                                android:src="@drawable/com_facebook_profile_picture_blank_square"
+                                android:layout_marginTop="5dp"
                                 android:layout_width="65dp"
                                 android:layout_height="65dp"
-                                app:srcCompat="@drawable/com_facebook_profile_picture_blank_square"
                                 android:layout_marginLeft="5dp"
                                 android:scaleType="fitCenter"
                                 android:adjustViewBounds="true"
-                                android:id="@+id/imageView_viewcontent_userpic"
-                                />
+                                android:id="@+id/imageView_viewcontent_userpic"/>
 
                             <LinearLayout
                                 android:layout_width="wrap_content"

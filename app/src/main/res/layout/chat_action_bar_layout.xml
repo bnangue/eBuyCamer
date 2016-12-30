@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_gravity="center"
+        android:paddingTop="2dp">
+
+        <com.mikhaellopez.circularimageview.CircularImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            app:civ_border="true"
+            android:maxHeight="?attr/actionBarSize"
+            app:civ_border_width="0dp"
+            app:civ_border_color="#ffff"
+            android:id="@+id/imageView_viewcontent_userpic_actionBarLayout"
+            android:scaleType="fitCenter"
+            android:adjustViewBounds="true"
+            android:padding="2dp"
+            android:src="@drawable/com_facebook_profile_picture_blank_square"
+            />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_weight="2"
+            android:layout_gravity="end|center"
+            android:gravity="start|center"
+            android:layout_marginLeft="20dp"
+            >
+
+            <TextView
+
+                android:text=""
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/textView_viewcontent_user_name_actionBarLayout"
+                android:layout_weight="1"
+                android:textSize="18sp"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                />
+
+
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

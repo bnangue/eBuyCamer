@@ -18,9 +18,12 @@ public class PrivateContent {
     private Categories categorie;
     private Locations location;
     private String currency;
+    private String firstPicture;
+    private boolean isNegotiable;
 
 
     public PrivateContent() {
+
     }
 
 
@@ -103,5 +106,22 @@ public class PrivateContent {
 
     public void setCurrency(String currency) {
         this.currency = currency;
+    }
+
+    public String getFirstPicture() {
+        return firstPicture;
+    }
+
+    public void setFirstPicture(String firstPicture) {
+        this.firstPicture = firstPicture;
+    }
+
+
+    public boolean isNegotiable() {
+        return isNegotiable;
+    }
+
+    public void setNegotiable(boolean negotiable) {
+        isNegotiable = negotiable;
     }
 }

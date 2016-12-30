@@ -7,8 +7,8 @@ android {
         applicationId "com.bricenangue.nextgeneration.ebuycamer"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 3
-        versionName "1.0.02"
+        versionCode 4
+        versionName "1.0.06"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
 
@@ -61,9 +61,12 @@ dependencies {
     })
     compile files('libs/jackson-all-1.9.5.jar')
     compile 'com.android.support:appcompat-v7:25.1.0'
+
     compile 'com.firebaseui:firebase-ui:1.0.1'
     compile 'com.firebase:firebase-client-android:2.5.2'
+    compile 'com.google.firebase:firebase-core:10.0.0'
     compile 'com.google.firebase:firebase-database:10.0.0'
+    compile 'com.google.firebase:firebase-invites:10.0.0'
     compile 'com.google.firebase:firebase-auth:10.0.0'
     compile 'com.google.firebase:firebase-storage:10.0.0'
     compile 'com.google.firebase:firebase-messaging:10.0.0'
@@ -75,5 +78,7 @@ dependencies {
     compile 'com.android.support:support-v4:25.1.0'
     compile 'com.android.support:support-vector-drawable:25.1.0'
     testCompile 'junit:junit:4.12'
+    compile 'com.github.lopspower:CircularImageView:3.0.0'
+
 }
 apply plugin: 'com.google.gms.google-services'

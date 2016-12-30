@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/message1"
+       android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/singlemessage"
+            android:background="@drawable/out_message_bg"
+            android:paddingLeft="10dp"
+            android:layout_margin="6dp"
+            android:textSize="17sp"
+            android:textColor="@color/common_google_signin_btn_text_light"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView_chat_item_send_status"
+            android:text="not send"
+            android:textSize="10sp"
+            android:paddingLeft="10dp"
+           android:visibility="gone" />
+
+    </LinearLayout>
+</LinearLayout>
+

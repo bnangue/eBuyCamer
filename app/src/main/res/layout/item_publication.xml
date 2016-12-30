@@ -11,7 +11,8 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:layout_marginBottom="2dp">
+        android:layout_marginBottom="2dp"
+        android:id="@+id/relative_layout_item_publication">
 
         <ImageView
             android:layout_width="120dp"
@@ -41,7 +42,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="30dp"
+                android:layout_height="35dp"
                 android:orientation="horizontal"
                 android:id="@+id/linearLayout_location"
                 android:padding="5dp"
@@ -57,18 +58,19 @@
                     android:id="@+id/textView_publication_locatiomn"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:text="Location"
+                    android:text=""
                     android:gravity="center"
-                    android:layout_gravity="end"
+                    android:layout_gravity="end|center"
                     android:layout_marginRight="20dp"
                     />
 
                 <TextView
                     android:layout_width="53dp"
                     android:layout_height="wrap_content"
-                    android:text="today"
+                    android:text=""
                     android:id="@+id/textView_publication_time"
                     android:gravity="center"
+                    android:layout_gravity="end|center"
                     android:layout_marginLeft="10dp"
                     android:layout_weight="1"
                     />
@@ -76,7 +78,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Titre de la Publication qui est longue tres longe  oui elle "
+                android:text=""
                 android:id="@+id/textView_publication_title"
                 android:gravity="start"
                 android:layout_alignParentStart="true"
@@ -93,19 +95,39 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1.000 FCFA"
+                android:text=""
                 android:id="@+id/textView_publication_price"
                 android:gravity="center"
-                android:layout_alignParentBottom="true"
+                android:layout_above="@+id/textView_publication_is_negotiable"
                 android:textSize="17sp"
                 android:textStyle="bold"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentLeft="true"
                 android:textColor="@color/colorgreen"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:id="@+id/textView_publication_is_negotiable"
+                android:gravity="center"
+                android:layout_alignParentBottom="true"
+                android:textSize="12sp"
+                android:textStyle="normal"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                />
 
 
         </RelativeLayout>
 
 
     </RelativeLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorAccent"
+        android:layout_below="@+id/relative_layout_item_publication"
+        android:id="@+id/view_viewcontent_separator"
+        android:alpha="1"
+        android:layout_marginBottom="1dp"/>
 </RelativeLayout>

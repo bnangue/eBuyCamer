@@ -59,6 +59,7 @@
         <item>Others</item>
     </array>
 
+    //all deals have category number = 20
 
     // for paths in firebase mainpage (all in english)
     <array name="categories_arrays_create_mainpage">
@@ -89,26 +90,17 @@
 
     <array name="currency">
         <item>XAF</item>
-        <item>EUR</item>
-        <item>USD</item>
-        <item>GBP</item>
-
     </array>
 
     // currency
     <string name="currency_xaf">XAF</string>
-    <string name="currency_euro">EUR</string>
-    <string name="currency_usd">USD</string>
-    <string name="currency_gbp">GBP</string>
-
 
     <array name="toolbar_spinner">
         <item>XAF</item>
-        <item>EUR</item>
     </array>
 
-    <array name="categories_array_mainpage">
-        <item>New in your area</item>
+    <string-array name="categories_array_createitempage">
+        <item>Select a category</item>
         <item>Electronics</item>
         <item>Cars and Motors</item>
         <item>Fashion and Accessories</item>
@@ -119,8 +111,7 @@
         <item>Movies, Books and Music</item>
         <item>Pets and Accessories</item>
         <item>Others</item>
-    </array>
-
+    </string-array>
 
     <array name="categories_array_activity">
         <item>All Publications</item>
@@ -292,5 +283,102 @@
     </string>
     <string name="string_button_delete_account">Delete  my account</string>
     <string name="spinner_toolbar_all_categories_tag">All Cities</string>
+    <string name="connection_to_server_not_aviable">Your are offline. Please check your internet connection</string>
+    <string name="button_toolbar_chat">Chats</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="title_activity_create_adeal">Create A Sale</string>
+    <string name="textView_category_deal">Sale</string>
+    <string name="create_post_hint_price_minimal">Minimal price</string>
+    <string name="string_viewcontent_button_make_an_offer">Make an offer</string>
+    <string name="string_price_of_deal_negotiable">Negotiable</string>
+    <string name="all_deals">All Sales</string>
+    <string name="action_my_deal">My Sales</string>
+    <string name="string_viewcontent_marked_as_favorite">Added to your favorites</string>
+    <string name="string_viewcontent_unmarked_as_favorite">Removed from your favorites</string>
+    <string name="alertDialog_viewDeal_make_offer_message">The seller will receive a notification</string>
+    <string name="alertDialog_viewDeal_make_offer_title">Make an offer</string>
+    <string name="alertDialog_viewDeal_make_offer_button_ok">Confirm</string>
+    <string name="alertDialog_viewDeal_make_offer_button_cancel">Cancel</string>
+    <string name="string_viewcontent_my_offer">Your current offer</string>
+    <string name="imageView_viewcontent_user_header">Seller :</string>
+    <string name="view_deal_content_no_offers_yet">You haven\'t made any offer yet.</string>
+    <string name="viewdeal_user_opening">Currently</string>
+    <string name="viewdeal_user_opening_offers">offers</string>
+    <string name="viewdeal_user_opening_offer">offer</string>
+    <string name="string_viewcontent_mydeal_overview">Overview</string>
+    <string name="textView_activity_single_deal_all_offers_text">All current offers</string>
+    <string name="button_contact_text">contact</string>
+    <string name="send">Send</string>
+    <string name="type_your_message">Type your message here</string>
+    <string name="toast_text_pending">sending</string>
+    <string name="Chat_Message_recieved_from">New message from</string>
+    <string name="fcm_Notification_title_message_sent_translatable">New chat message</string>
+    <string name="fcm_Notification_message" translatable="false">New chat message</string>
+    <string name="fcm_notification_city" translatable="false">CITY</string>
+    <string name="change_my_email">Change my email</string>
+    <string name="fcm_Notification_new_offers" translatable="false">New Offer</string>
+    <string name="fcm_Notification_new_offers_translatable">New Offer</string>
+    <string name="fcm_Notification_new_offers_message">Don\'t miss any offers on your merchandise</string>
+    <string name="fcm_Notification_new_publication" translatable="false">New Publication</string>
+    <string name="fcm_Notification_new_publication_translatable">New Publications</string>
+    <string name="fcm_Notification_title_message_sent">New chat message</string>
+    <string name="userprofile_hint_country_code" translatable="false">+237</string>
+    <string name="userprofile_hint_phone_number">Phone number</string>
+    <string name="userprofile_hint_edit_phone_number">Edit phone number</string>
+    <string name="userprofile_hint_country_code_country" translatable="false">Code</string>
+    <string name="password_hint_app">Password</string>
+    <string name="email_hint_app">Email</string>
+    <string name="string_button_phone_change_activity">Request confirmation code</string>
+    <string name="userprofile_hint_country_code_country_exp" translatable="false">Code (+237)</string>
+    <string name="alertDialog_change_phone_number">Add a phone number</string>
+    <string name="alertDialog_change_phone_number_message">a phone number ease the contact</string>
+    <string name="button_later">Later</string>
+    <string name="button_add">Add</string>
+    <string name="alertDialog_no_internet_connection">No internet connection</string>
+    <string name="alertDialog_no_internet_connection_message">You have no internet connection. If you continue the app might not function properly. Please make sure you have a working internet connection</string>
+    <string name="check_box_create_post_hint_is_negotiable">Negotiable</string>
+    <string name="text_is_negotiable">negotiable</string>
+    <string name="text_is_not_negotiable">negotiable</string>
+    <string name="today">today</string>
+    <string name="yesterday">yesterday</string>
+    <string name="two_days_ago">two days ago</string>
+    <string name="three_days_ago">3 days ago</string>
+    <string name="four_days_ago">4 days ago</string>
+    <string name="five_days_ago">5 days ago</string>
+    <string name="six_days_ago">6 days ago</string>
+    <string name="a_week_ago">1 week ago</string>
+    <string name="eight_days_ago">8 days ago</string>
+    <string name="nine_days_ago">9 days ago</string>
+    <string name="ten_days_ago">10 days ago</string>
+    <string name="eleven_days_ago">11 days ago</string>
+    <string name="twelve_days_ago">12 days ago</string>
+    <string name="thirteen_days_ago">13 days ago</string>
+    <string name="two_weeks_ago">2 weeks ago</string>
+    <string name="three_weeks_ago">3 weeks ago</string>
+    <string name="one_month_ago">1 month ago</string>
+    <string name="two_months_ago">2 months ago</string>
+    <string name="alertDialogdeleteCHatt">Delete this chat?</string>
+    <string name="alertDialogdeleteCHatt_message">All conversations will be lost</string>
+    <string name="button_delete">Delete Chat</string>
+    <string name="toast_chat_deleted">Chat deleted</string>
+    <string name="app_name_ChangePhoneNumberActivity">Phone Number</string>
+    <string name="app_name_SingleDealActivityActivity">My Deal</string>
+    <string name="app_name_MyDealsActivity">My Deals</string>
+    <string name="app_name_UserProfileActivity">My Profile</string>
+    <string name="button_continue">Continue</string>
+    <string name="new_conversation">New Message</string>
+    <string name="textView_view_deal_my_current_offer">you offered</string>
+    <string name="new_deal_in_your_area">New deals in your area</string>
+    <string name="notification_new_deal_title">New Deals</string>
+    <string name="fcm_Notification_new_publication_message">New publications in your area</string>
+    <string name="pref_title_new_publication_notifications">New publication notifications</string>
+    <string name="pref_title_new_deal_notifications">New sale notifications</string>
+    <string name="fcm_Notification_new_offers_translatables">New offers</string>
+    <string name="invitation_title">Share Bizness Camer with friends</string>
+    <string name="invitation_message">Hi friend, try this new awesome App.</string>
+    <string name="invitation_deep_link" translatable="false">https://zfcs5.app.goo.gl/H3Ed</string>
+    <string name="invitation_cta">Click here</string>
+    <string name="check_box_create_post_hint_is_for_free">For free</string>
+
 
 </resources>

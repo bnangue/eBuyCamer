@@ -8,7 +8,6 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:src="@drawable/ic_add_a_photo_black_48dp"
         android:id="@+id/img_pager_item"
         android:scaleType="centerInside"
         android:adjustViewBounds="true"

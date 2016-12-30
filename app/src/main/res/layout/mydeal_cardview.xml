@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:animateLayoutChanges="true"
+    android:descendantFocusability="blocksDescendants">
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/card_view_mydeal_cardview"
+        android:layout_gravity="center"
+        android:layout_width="fill_parent"
+        android:layout_height="150dp"
+        android:layout_margin="5dp"
+        card_view:cardCornerRadius="2dp"
+        >
+
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="2dp"
+            android:id="@+id/relative_layout_mydeal_cardview_content"
+            android:layout_above="@+id/relative_layout_mydeal_cardview_buttons">
+
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="120dp"
+                android:id="@+id/relativLayout_mydeal_cardview"
+                android:layout_alignParentTop="true"
+                android:layout_toRightOf="@+id/imageView_publicationFirstphoto_mydeal_cardview_drawer_layout"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginLeft="10dp"
+                android:paddingBottom="5dp"
+                >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:orientation="horizontal"
+                    android:id="@+id/linearLayout_location_mydeal_cardview"
+                    android:padding="3dp"
+                    android:layout_marginRight="5dp"
+                    android:weightSum="2">
+                    <TextView
+                        android:id="@+id/textView_publication_location_mydeal_cardview"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:text=""
+                        android:gravity="start"
+                        android:layout_gravity="end|center"
+                        android:layout_weight="1"
+                        />
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:text=""
+                        android:id="@+id/textView_publication_time_mydeal_cardview"
+                        android:gravity="end"
+                        android:layout_gravity="top"
+
+                        android:layout_weight="1"
+                        />
+                </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:id="@+id/textView_publication_title_mydeal_cardview"
+                    android:gravity="start"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginBottom="20dp"
+                    android:textSize="13sp"
+                    android:maxLines="2"
+                    android:textStyle="bold"
+                    android:maxLength="42"
+                    android:layout_below="@+id/linearLayout_location_mydeal_cardview"
+                    />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:id="@+id/textView_publication_category_deal"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_above="@+id/textView_publication_price_mydeal_cardview"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:id="@+id/textView_publication_price_mydeal_cardview"
+                    android:gravity="center"
+                    android:layout_alignParentBottom="true"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:textColor="@color/colorgreen"
+                    />
+
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_remove_red_eye_black_18dp"
+                    android:gravity="end|top"
+                    android:text=""
+                    android:id="@+id/button_mydeal_cardview_viewer"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_below="@+id/textView_publication_title_mydeal_cardview"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:clickable="false"
+                    />
+            </RelativeLayout>
+
+
+
+                <RelativeLayout
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:id="@+id/imageView_publicationFirstphoto_mydeal_cardview_drawer_layout">
+                    <ImageView
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:scaleType="centerInside"
+                        android:adjustViewBounds="true"
+                        android:id="@+id/imageView_publicationFirstphoto_mydeal_cardview"
+                        android:paddingBottom="2dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true" />
+                    <ImageView
+                        android:id="@+id/imageView_my_favorite_sale_logo"
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:scaleType="centerInside"
+                        android:adjustViewBounds="true"
+                        android:src="@drawable/discount"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        />
+                </RelativeLayout>
+
+
+
+
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:id="@+id/relative_layout_mydeal_cardview_buttons"
+            android:layout_gravity="bottom"
+            android:layout_marginTop="5dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/button_edit_mydeal_cardview"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_mode_edit_black_24dp"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"/>
+
+                <Button
+                    android:id="@+id/button_delete_mydeal_cardview"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_delete_black_24dp"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"/>
+
+                <Button
+                    android:id="@+id/button_share_mydeal_cardview"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_share_black_24dp"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"/>
+
+                <Button
+                    android:id="@+id/button_promote_mydeal_cardview"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"
+                    android:textColor="@color/authui_colorPrimary"
+                    android:textSize="10sp"
+                    android:gravity="end|center"
+                    android:drawableRight="@drawable/ic_arrow_upward_black_24dp"
+
+
+                    />
+                <Button
+                    android:id="@+id/button_overview_mydeal_cardview"
+                    android:layout_weight="2"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/string_viewcontent_mydeal_overview"
+                    android:textAllCaps="false"
+                    android:textSize="10sp"
+                    android:gravity="center"
+                    android:drawableRight="@drawable/ic_picture_in_picture_black_24dp"
+                    android:drawableEnd="@drawable/ic_picture_in_picture_black_24dp"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"/>
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+
+    </android.support.v7.widget.CardView>
+
+</LinearLayout>

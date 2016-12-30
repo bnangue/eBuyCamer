@@ -4,7 +4,10 @@ import android.app.Activity;
 import android.app.FragmentManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,7 +49,7 @@ public class RecyclerViewAdapterPosts extends RecyclerView
     public static class PublicationViewHolders extends RecyclerView.ViewHolder
      implements View.OnClickListener{
         ImageView postPicture,imageViewLocation;
-        TextView titel, time, price, mylocation;
+        TextView titel, time, price, mylocation,isnegotiable;
         private View view;
         private MyRecyclerAdaptaterPostClickListener clickListener;
 
@@ -59,6 +62,7 @@ public class RecyclerViewAdapterPosts extends RecyclerView
             postPicture=(ImageView) itemView.findViewById(R.id.imageView_publicationFirstphoto);
             imageViewLocation=(ImageView) itemView.findViewById(R.id.imageView_publicationLocation);
 
+            isnegotiable=(TextView)itemView.findViewById(R.id.textView_publication_is_negotiable);
             titel=(TextView) itemView.findViewById(R.id.textView_publication_title);
             time=(TextView) itemView.findViewById(R.id.textView_publication_time);
             price=(TextView) itemView.findViewById(R.id.textView_publication_price);
@@ -100,30 +104,48 @@ public class RecyclerViewAdapterPosts extends RecyclerView
     @Override
     public void onBindViewHolder(final PublicationViewHolders viewHolder, final int position) {
        final Publication model=mDataset.get(position);
+
+        if(model.getPrivateContent().isNegotiable()){
+            viewHolder.isnegotiable.setText(context.getString(R.string.text_is_not_negotiable));
+        }else {
+            viewHolder.isnegotiable.setText("");
+        }
         viewHolder.titel.setText(model.getPrivateContent().getTitle());
         viewHolder.mylocation.setText(model.getPrivateContent().getLocation().getName());
-        if(model.getPrivateContent().getPublictionPhotos()!=null){
-            Picasso.with(context).load(model.getPrivateContent().getPublictionPhotos().get(0).getUri())
-                    .networkPolicy(NetworkPolicy.OFFLINE)
-                    .fit().centerInside()
-                    .into(viewHolder.postPicture, new Callback() {
-                        @Override
-                        public void onSuccess() {
+       if(model.getPrivateContent().getFirstPicture()!=null){
+           byte[] decodedString = Base64.decode(model.getPrivateContent().getFirstPicture(), Base64.DEFAULT);
+           Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
 
-                        }
-
-                        @Override
-                        public void onError() {
-                            Picasso.with(context).load(model.getPrivateContent()
-                                    .getPublictionPhotos().get(0).getUri())
-                                    .fit().centerInside().into(viewHolder.postPicture);
-
-                        }
-                    });
+           viewHolder.postPicture.setImageBitmap(decodedByte);
 
         }else {
-            viewHolder.postPicture.setImageDrawable(context.getResources().getDrawable(R.mipmap.ic_launcher));
+           if(model.getPrivateContent().getPublictionPhotos()!=null){
+               Picasso.with(context).load(model.getPrivateContent().getPublictionPhotos().get(0).getUri())
+                       .networkPolicy(NetworkPolicy.OFFLINE)
+                       .fit().centerInside()
+                       .into(viewHolder.postPicture, new Callback() {
+                           @Override
+                           public void onSuccess() {
+
+                           }
+
+                           @Override
+                           public void onError() {
+                               Picasso.with(context).load(model.getPrivateContent()
+                                       .getPublictionPhotos().get(0).getUri())
+                                       .fit().centerInside().into(viewHolder.postPicture);
+
+                           }
+                       });
+
+           }else {
+               viewHolder.postPicture.setImageDrawable(context.getResources().getDrawable(R.mipmap.ic_launcher));
+           }
         }
+
+
+
+
 
         DecimalFormat decFmt = new DecimalFormat("#,###.##", DecimalFormatSymbols.getInstance(Locale.GERMAN));
         decFmt.setMaximumFractionDigits(2);
@@ -133,19 +155,26 @@ public class RecyclerViewAdapterPosts extends RecyclerView
         BigDecimal amt = new BigDecimal(p);
         String preValue = decFmt.format(amt);
 
-        if(currencyArray!=null){
-            viewHolder.price.setText(preValue + " " + currencyArray[getCurrencyPosition(model.getPrivateContent().getCurrency())]);
-
+        if(p.equals("0")){
+            viewHolder.price.setText(context.getString(R.string.check_box_create_post_hint_is_for_free));
         }else {
-            viewHolder.price.setText(preValue + " " + model.getPrivateContent().getCurrency());
+            if(currencyArray!=null){
+                viewHolder.price.setText(preValue + " " + currencyArray[getCurrencyPosition(model.getPrivateContent().getCurrency())]);
 
+            }else {
+                viewHolder.price.setText(preValue + " " + model.getPrivateContent().getCurrency());
+
+            }
         }
+
 
 
         Date date = new Date(model.getPrivateContent().getTimeofCreation());
         DateFormat formatter = new SimpleDateFormat("HH:mm");
         String dateFormatted = formatter.format(date);
-        viewHolder.time.setText(dateFormatted);
+
+        CheckTimeStamp checkTimeStamp= new CheckTimeStamp(context,model.getPrivateContent().getTimeofCreation());
+        viewHolder.time.setText(checkTimeStamp.checktime());
 
 
 
@@ -164,17 +193,10 @@ public class RecyclerViewAdapterPosts extends RecyclerView
 
     private int getCurrencyPosition(String currency){
         if(currency.equals(context.getString(R.string.currency_xaf))
-                || currency.equals("FCFA") || currency.equals("XAF")){
+                || currency.equals("F CFA") || currency.equals("XAF")){
             return 0;
-        }else if (currency.equals(context.getString(R.string.currency_euro))
-                || currency.equals("EURO") || currency.equals("EUR")){
-            return 1;
-        }else if (currency.equals(context.getString(R.string.currency_usd))
-                || currency.equals("DOLLAR") || currency.equals("USD")){
-            return 2;
-        }else{
-            return 3;
         }
+        return 0;
 
     }
 }

@@ -13,6 +13,7 @@ import java.util.Map;
 public class Publication {
     PrivateContent privateContent;
     PublicContent publicContent;
+    private CategoriesDeal categoriesDeal;
 
 
     public Publication() {
@@ -37,5 +38,13 @@ public class Publication {
 
     public void setPublicContent(PublicContent publicContent) {
         this.publicContent = publicContent;
+    }
+
+    public CategoriesDeal getCategoriesDeal() {
+        return categoriesDeal;
+    }
+
+    public void setCategoriesDeal(CategoriesDeal categoriesDeal) {
+        this.categoriesDeal = categoriesDeal;
     }
 }

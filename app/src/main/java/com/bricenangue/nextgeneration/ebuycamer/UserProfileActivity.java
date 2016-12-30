@@ -1,8 +1,11 @@
 package com.bricenangue.nextgeneration.ebuycamer;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
@@ -17,6 +20,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -32,6 +36,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.mikhaellopez.circularimageview.CircularImageView;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
@@ -40,10 +45,10 @@ import java.util.ArrayList;
 import java.util.Map;
 
 public class UserProfileActivity extends AppCompatActivity implements View.OnClickListener {
-    private EditText editTextEmail, editTextNumbOfAds,editTextLocation;
-    private ImageButton imageButtoneditMail, imageButtonChangeLocation;
+    private EditText editTextEmail, editTextNumbOfAds,editTextLocation,editTextPhoneNumber, editTextCode;
+    private ImageButton imageButtoneditMail, imageButtonChangeLocation,imageButtonEditPhone;
     private TextView textViewUsername;
-    private ImageView imageViewUserPicture;
+    private CircularImageView imageViewUserPicture;
     private Button buttonSavePicture;
     private ArrayList<String> keys=new ArrayList<>();
     private ArrayList<Publication> mypublications=new ArrayList<>();
@@ -63,6 +68,25 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
     private static final int ENTERPASSWORD=4;
     private static final int UPDATEEMAIL=5;
     private ProgressBar progressBare;
+    private UserSharedPreference userSharedPreference;
+
+    public boolean haveNetworkConnection() {
+        boolean haveConnectedWifi = false;
+        boolean haveConnectedMobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo ni : netInfo) {
+            if ( "WIFI".equals(ni.getTypeName()))
+                if (ni.isConnected())
+                    haveConnectedWifi = true;
+            if ("MOBILE".equals(ni.getTypeName()))
+                if (ni.isConnected())
+                    haveConnectedMobile = true;
+        }
+        return haveConnectedWifi || haveConnectedMobile;
+    }
+
 
 
     @Override
@@ -70,6 +94,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_profile);
 
+        userSharedPreference=new UserSharedPreference(this);
         auth=FirebaseAuth.getInstance();
 
         if(auth!=null){
@@ -91,20 +116,37 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         imageButtonChangeLocation=(ImageButton)findViewById(R.id.imageButton_userprofile_edit_location);
         imageButtoneditMail=(ImageButton)findViewById(R.id.imageButton_userprofile_edit_email);
 
-        imageViewUserPicture=(ImageView)findViewById(R.id.imageView_user_profile);
+        imageViewUserPicture=(CircularImageView)findViewById(R.id.imageView_user_profile);
+
+        imageButtonEditPhone=(ImageButton)findViewById(R.id.imageButton_userprofile_edit_phone_number);
 
         textViewUsername=(TextView)findViewById(R.id.textView_userprofile_user_name);
 
         buttonSavePicture=(Button)findViewById(R.id.button_userprofile_save_picture);
+        editTextPhoneNumber=(EditText)findViewById(R.id.editText_userprofile_phone_number);
+        editTextCode=(EditText)findViewById(R.id.editText_userprofile_country_code);
 
 
         imageButtoneditMail.setOnClickListener(this);
         imageButtonChangeLocation.setOnClickListener(this);
         imageViewUserPicture.setOnClickListener(this);
         buttonSavePicture.setOnClickListener(this);
+        imageButtonEditPhone.setOnClickListener(this);
 
-        fetchUser();
+        if (!haveNetworkConnection()){
+            Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
+                    ,Toast.LENGTH_SHORT).show();
+        }
 
+
+    }
+
+
+
+    private void dismissProgressbar(){
+        if (progressBar!=null){
+            progressBar.dismiss();
+        }
     }
 
     private void fetchUser(){
@@ -121,8 +163,10 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     userPublic=dataSnapshot.getValue(UserPublic.class);
                     if(userPublic!=null){
                         showUser(userPublic);
+
                     }
                 }else {
+                    dismissProgressbar();
                     cancelProgressbar();
                     //NO user Profile
                     finish();
@@ -135,13 +179,23 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                 cancelProgressbar();
             }
         });
+
+        if (!haveNetworkConnection()){
+            dismissProgressbar();
+        }
     }
 
     private void showUser(final UserPublic userPublic){
+        dismissProgressbar();
         editTextNumbOfAds.setText(String.valueOf(userPublic.getNumberOfAds()));
         editTextLocation.setText(userPublic.getLocation().getName());
         editTextEmail.setText(userPublic.getEmail());
         textViewUsername.setText(userPublic.getName());
+        if(userPublic.getPhoneNumber()!=null){
+            editTextCode.setText(userPublic.getPhoneNumber().getCode());
+            editTextPhoneNumber.setText(userPublic.getPhoneNumber().getPhoneNumber());
+        }
+
 
         if(userPublic.getProfilePhotoUri()!=null){
             Picasso.with(getApplicationContext()).load(userPublic.getProfilePhotoUri()).networkPolicy(NetworkPolicy.OFFLINE)
@@ -175,24 +229,53 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         switch (view.getId()){
             case R.id.imageButton_userprofile_edit_email:
 
-                startActivityForResult(new Intent(UserProfileActivity.this,
-                        DeleteAccountEnterPasswordActivity.class).putExtra("isEmail",true),UPDATEEMAIL);
+                if (!haveNetworkConnection()){
+                    Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
+                            ,Toast.LENGTH_SHORT).show();
+                }else {
+                    startActivityForResult(new Intent(UserProfileActivity.this,
+                            DeleteAccountEnterPasswordActivity.class).putExtra("isEmail",true),UPDATEEMAIL);
+
+                }
 
                 break;
             case R.id.imageButton_userprofile_edit_location:
                 //startactivity for result and update location in preference
-                startActivityForResult(new Intent(UserProfileActivity.this,LocationsActivity.class)
-                .putExtra("user_location",true),LOCATION_INTENT);
+                if (!haveNetworkConnection()){
+                    Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
+                            ,Toast.LENGTH_SHORT).show();
+                }else {
+                    startActivityForResult(new Intent(UserProfileActivity.this,LocationsActivity.class)
+                            .putExtra("user_location",true),LOCATION_INTENT);
+                }
+
                 break;
 
             case R.id.imageView_user_profile:
+
                 getPicture();
                 break;
 
             case R.id.button_userprofile_save_picture:
-                if(pictureUri!=null){
-                    saveProfilePic(pictureUri);
+                if (!haveNetworkConnection()){
+                    Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
+                            ,Toast.LENGTH_SHORT).show();
+                }else {
+                    if(pictureUri!=null){
+                        saveProfilePic(pictureUri);
+                    }
                 }
+
+                break;
+            case R.id.imageButton_userprofile_edit_phone_number:
+                if (!haveNetworkConnection()){
+                    Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
+                            ,Toast.LENGTH_SHORT).show();
+                }else {
+                    startActivity(new Intent(UserProfileActivity.this,ChangePhoneNumberActivity.class)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                }
+
                 break;
 
         }
@@ -212,10 +295,22 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
         switch (item.getItemId()){
             case R.id.action_delete_account :
-               deleteAccount();
+                if (!haveNetworkConnection()){
+                    Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
+                            ,Toast.LENGTH_SHORT).show();
+                }else {
+                    deleteAccount();
+                }
+
                 return true;
             case R.id.action_logout:
-                loggout();
+                if (!haveNetworkConnection()){
+                    Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
+                            ,Toast.LENGTH_SHORT).show();
+                }else {
+                    loggout();
+                }
+
                 return true;
             case R.id.action_settings:
                 startActivity(new Intent(UserProfileActivity.this,SettingsActivity.class));
@@ -225,6 +320,12 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
         }
         return super.onOptionsItemSelected(item);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fetchUser();
     }
 
     private void continueDeleteAccount(){
@@ -495,6 +596,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         FirebaseAuth.getInstance().signOut();
+                        userSharedPreference.clearUserData();
                         startActivity(new Intent(UserProfileActivity.this,MainActivity.class)
                                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
                         finish();
@@ -592,9 +694,10 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
 
         }else if (requestCode == LOCATION_INTENT && resultCode==RESULT_OK){
             String location=data.getExtras().getString("user_location");
+            int  position=data.getExtras().getInt("position_location");
             editTextLocation.setText(location);
             UserSharedPreference preference =new UserSharedPreference(getApplicationContext());
-            preference.storeUserLocation(location);
+            preference.storeUserLocation(location,position);
 
         }else if (requestCode == ENTERPASSWORD && resultCode==RESULT_OK){
             continueDeleteAccount();
@@ -619,6 +722,7 @@ public class UserProfileActivity extends AppCompatActivity implements View.OnCli
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
                                     editTextEmail.setText(email);
+                                    user.sendEmailVerification();
                                     cancelProgressbar();
                                 }
                             });

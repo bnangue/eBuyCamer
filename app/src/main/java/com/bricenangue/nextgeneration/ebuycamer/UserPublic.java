@@ -19,7 +19,7 @@ public class UserPublic {
     private String profilePhotoUri;
     private Map<String,Url> userLinks;
     private long numberOfAds;
-    private String phoneNumber;
+    private PhoneNumber phoneNumber;
 
     public UserPublic() {
 
@@ -90,11 +90,11 @@ public class UserPublic {
         this.numberOfAds = numberOfAds;
     }
 
-    public String getPhoneNumber() {
+    public PhoneNumber getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setPhoneNumber(String phoneNumber) {
+    public void setPhoneNumber(PhoneNumber phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 }

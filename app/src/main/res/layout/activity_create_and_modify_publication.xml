@@ -109,6 +109,31 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/linearLayout_activity_create_post_checkbox"
+        android:orientation="horizontal"
+        android:layout_below="@+id/layout_price"
+        >
+
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/check_box_create_post_hint_is_negotiable"
+            android:id="@+id/check_box_create_post_is_negotiable"
+            />
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/check_box_create_post_hint_is_for_free"
+            android:id="@+id/check_box_create_post_is_for_free"
+            android:layout_gravity="end"/>
+
+    </LinearLayout>
+
     <Button
         android:text="@string/create_post_button_text_sale_now"
         android:layout_width="wrap_content"
@@ -142,8 +167,7 @@
             android:layout_gravity="center"
             android:id="@+id/spinner_choose_categorie"
             android:gravity="center"
-            android:entries="@array/categories_array_activity"
-            android:prompt="@string/categories_prompt"
+            android:entries="@array/categories_array_createitempage"
             style="@style/Base.Widget.AppCompat.Button.Borderless"
             android:dropDownSelector="@drawable/ic_keyboard_arrow_down_black_48dp"
            >

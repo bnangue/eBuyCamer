@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:padding="5dp"
+    android:layout_marginBottom="2dp">
+
+
+    <Button
+        android:padding="4dp"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:id="@+id/button_single_deal_item_contact"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:drawableRight="@drawable/ic_chat_white_18dp"
+        android:text="@string/button_contact_text"
+        android:textAllCaps="false"
+        android:gravity="center|start"
+        style="@style/button_round"
+        android:layout_centerVertical="true"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_centerVertical="true"
+        android:id="@+id/linearLayout_single_deal_item"
+        android:gravity="center_vertical"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_toLeftOf="@+id/button_single_deal_item_contact"
+        android:layout_toStartOf="@+id/button_single_deal_item_contact"
+        android:layout_alignParentTop="true"
+        >
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView_single_deal_item_user_offer"
+            android:layout_marginLeft="10dp"
+            android:text=""
+            android:textColor="@color/colorgreen"
+            android:textSize="18sp"
+            android:textAllCaps="false"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/textView_single_deal_item_time"
+            android:layout_marginLeft="10dp"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="5dp"
+            android:text=""
+            android:textSize="13sp"
+            android:textAllCaps="false"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -3,12 +3,17 @@ package com.bricenangue.nextgeneration.ebuycamer;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.AsyncTask;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,13 +27,22 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.messaging.FirebaseMessaging;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -52,6 +66,23 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
     private boolean getuserlocation=false;
     FirebaseUser user;
     private UserSharedPreference userSharedPreference;
+
+    public boolean haveNetworkConnection() {
+        boolean haveConnectedWifi = false;
+        boolean haveConnectedMobile = false;
+
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo[] netInfo = cm.getAllNetworkInfo();
+        for (NetworkInfo ni : netInfo) {
+            if ( "WIFI".equals(ni.getTypeName()))
+                if (ni.isConnected())
+                    haveConnectedWifi = true;
+            if ("MOBILE".equals(ni.getTypeName()))
+                if (ni.isConnected())
+                    haveConnectedMobile = true;
+        }
+        return haveConnectedWifi || haveConnectedMobile;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +118,10 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
         setSupportActionBar(toolbar);
 
 
-        userSharedPreference.storeUserLocation(null);
+       int i= userSharedPreference.getUserLocation().getNumberLocation();
+        unsubscribeCityTopic(i);
+        userSharedPreference.storeUserLocation(null,-1);
+
         root= FirebaseDatabase.getInstance().getReference();
 
         recyclerView=(RecyclerView)findViewById(R.id.recyclerview_locations);
@@ -103,32 +137,46 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
             @Override
             public void onItemClick(final int position, View v) {
 
-                if(getuserlocation){
-                    userSharedPreference.storeUserLocation(locations_list.get(position));
-
-                    root.child(ConfigApp.FIREBASE_APP_URL_USERS).child(auth.getCurrentUser().getUid())
-                            .child("userPublic").child("Location").setValue(new Locations(locations_list.get(position)))
-                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    setResult(RESULT_OK,new Intent()
-                                            .putExtra("user_location",locations_list.get(position)));
-
-                                    finish();
-                                }
-                            });
-
+               subscribeCityTopic(position);
+                if (!haveNetworkConnection()){
+                    Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
+                            ,Toast.LENGTH_SHORT).show();
                 }else {
-                    userSharedPreference.storeUserLocation(locations_list.get(position));
-                    root.child(ConfigApp.FIREBASE_APP_URL_USERS).child(auth.getCurrentUser().getUid())
-                            .child("userPublic").child("Location").setValue(new Locations(locations_list.get(position)));
-                    startActivity(new Intent(LocationsActivity.this,CategoryActivity.class)
-                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                            .putExtra("locationName",locations_list.get(position)));
+                    if(getuserlocation){
+                       // subscribeCityTopic(position);
+                        userSharedPreference.storeUserLocation(locations_list.get(position),position);
 
-                    finish();
+                        root.child(ConfigApp.FIREBASE_APP_URL_USERS).child(auth.getCurrentUser().getUid())
+                                .child("userPublic").child("Location").setValue(new Locations(locations_list.get(position),position))
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        setResult(RESULT_OK,new Intent()
+                                                .putExtra("position_location",position)
+                                                .putExtra("user_location",locations_list.get(position)));
+
+
+                                        finish();
+                                    }
+                                });
+
+                    }else {
+                        userSharedPreference.storeUserLocation(locations_list.get(position),position);
+                        root.child(ConfigApp.FIREBASE_APP_URL_USERS).child(auth.getCurrentUser().getUid())
+                                .child("userPublic").child("Location").setValue(new Locations(locations_list.get(position),position))
+                                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+
+                                    }
+                                });
+                        startActivity(new Intent(LocationsActivity.this,CategoryActivity.class)
+                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                                .putExtra("locationName",locations_list.get(position)));
+
+                        finish();
+                    }
                 }
-
             }
         });
 
@@ -138,6 +186,19 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
 
     }
 
+    private void subscribeCityTopic(int position){
+         FirebaseMessaging
+        .getInstance()
+         .subscribeToTopic(getString(R.string.fcm_notification_city) + String.valueOf(position));
+
+    }
+
+    private void unsubscribeCityTopic(int position){
+        FirebaseMessaging
+                .getInstance()
+                .unsubscribeFromTopic(getString(R.string.fcm_notification_city) + String.valueOf(position));
+
+    }
     @Override
     protected void onStart() {
         super.onStart();
@@ -163,7 +224,13 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
         switch (item.getItemId()){
 
             case R.id.action_logout_location:
-                loggout();
+                if (!haveNetworkConnection()){
+                    Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
+                            ,Toast.LENGTH_SHORT).show();
+                }else {
+                    loggout();
+                }
+
                 return true;
             case R.id.action_settings_location:
                 startActivity(new Intent(LocationsActivity.this,SettingsActivity.class));
@@ -185,7 +252,9 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
     private void loggout() {
 
         final AlertDialog alertDialog =
-                new AlertDialog.Builder(LocationsActivity.this).setMessage(
+                new AlertDialog.Builder(LocationsActivity.this)
+                        .setIcon(getResources().getDrawable(R.drawable.ic_action_shutdown))
+                        .setMessage(
                         getString(R.string.alertDialoglogout)+" " +user.getEmail())
                         .create();
         alertDialog.setButton(DialogInterface.BUTTON_NEUTRAL, getString(R.string.button_cancel)
@@ -213,6 +282,7 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
         alertDialog.show();
 
     }
+
 
 }
 

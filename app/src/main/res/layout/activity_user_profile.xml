@@ -8,7 +8,6 @@
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.bricenangue.nextgeneration.ebuycamer.UserProfileActivity">
 
 
@@ -21,14 +20,18 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         >
-        <ImageView
+        <com.mikhaellopez.circularimageview.CircularImageView
             android:layout_width="150dp"
             android:layout_height="150dp"
-            app:srcCompat="@drawable/com_facebook_profile_picture_blank_square"
-            android:adjustViewBounds="true"
+            app:civ_border="true"
+            app:civ_border_width="0dp"
+            app:civ_border_color="#ffff"
+            android:id="@+id/imageView_user_profile"
             android:scaleType="centerInside"
+            android:adjustViewBounds="true"
+            android:src="@drawable/com_facebook_profile_picture_blank_square"
+            android:layout_marginTop="5dp"/>
 
-            android:id="@+id/imageView_user_profile" />
 
         <ProgressBar
             android:layout_width="wrap_content"
@@ -46,7 +49,7 @@
     </LinearLayout>
 
     <TextView
-        android:text="John Smith"
+        android:text=""
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/lineare_layout_userprofile_picture"
@@ -68,7 +71,7 @@
         android:orientation="horizontal"
         android:id="@+id/lineare_layout_userprofile_email_container"
         android:layout_below="@+id/view_userprofile_separator_time_viewer"
-        android:layout_marginTop="10dp">
+        android:layout_marginTop="5dp">
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -108,8 +111,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:id="@+id/lineare_layout_userprofile_location_container"
-        android:layout_below="@+id/lineare_layout_userprofile_email_container"
-        android:layout_marginTop="10dp">
+        android:layout_below="@+id/lineare_layout_userprofile_phone_number_container"
+        android:layout_marginTop="5dp">
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -147,7 +150,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/editText_layout_userprofile_numberofAds"
         android:layout_below="@+id/lineare_layout_userprofile_location_container"
-        android:layout_marginTop="10dp">
+        android:layout_marginTop="5dp">
         <EditText
             android:id="@+id/editText_userprofile_numberofAds"
             android:layout_width="wrap_content"
@@ -163,6 +166,73 @@
             android:linksClickable="false"
             />
     </android.support.design.widget.TextInputLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/lineare_layout_userprofile_phone_number_container"
+        android:layout_below="@+id/lineare_layout_userprofile_email_container"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginTop="5dp"
+            android:id="@+id/editText_layout_userprofile_country_code"
+            >
+            <EditText
+                android:id="@+id/editText_userprofile_country_code"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:ems="10"
+                android:maxLength="4"
+                android:inputType="phone"
+                android:hint="@string/userprofile_hint_country_code_country"
+                android:clickable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:longClickable="false"
+                android:linksClickable="false"
+                />
+        </android.support.design.widget.TextInputLayout>
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2.5"
+            android:id="@+id/editText_layout_userprofile_phone_number"
+            android:layout_marginTop="5dp">
+            <EditText
+                android:id="@+id/editText_userprofile_phone_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:ems="10"
+                android:maxLength="9"
+                android:inputType="phone"
+                android:hint="@string/userprofile_hint_phone_number"
+                android:clickable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:longClickable="false"
+                android:linksClickable="false"
+                />
+        </android.support.design.widget.TextInputLayout>
+        <ImageButton
+            android:id="@+id/imageButton_userprofile_edit_phone_number"
+            android:contentDescription="@string/userprofile_hint_edit_phone_number"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_mode_edit_black_24dp"
+            android:layout_weight="0.5"
+            style="@style/Widget.AppCompat.Button.Borderless"/>
+
+    </LinearLayout>
 
 
 </RelativeLayout>

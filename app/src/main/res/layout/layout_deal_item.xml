@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="122dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="2dp"
+        android:id="@+id/relative_layout_deal_activity">
+
+
+
+            <RelativeLayout
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:id="@+id/imageView_publicationFirstphoto_deal_drawer_layout">
+                <ImageView
+                    android:layout_width="120dp"
+                    android:layout_height="120dp"
+                    android:scaleType="centerInside"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:id="@+id/imageView_publicationFirstphoto_deal"
+                    android:paddingBottom="2dp"
+                    android:adjustViewBounds="true"
+                    />
+                <ImageView
+                    android:id="@+id/imageView_my_favorite_sale_logo"
+                    android:layout_width="35dp"
+                    android:layout_height="35dp"
+                    android:scaleType="centerInside"
+                    android:adjustViewBounds="true"
+                    android:src="@drawable/discount"
+                    android:layout_alignParentBottom="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    />
+            </RelativeLayout>
+
+
+
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/relativLayout_mypost_cardview_deal"
+            android:layout_alignParentTop="true"
+            android:layout_alignBottom="@+id/imageView_publicationFirstphoto_deal_drawer_layout"
+            android:layout_toRightOf="@+id/imageView_publicationFirstphoto_deal_drawer_layout"
+            android:layout_toEndOf="@+id/imageView_publicationFirstphoto_deal_drawer_layout"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginLeft="10dp"
+            android:paddingBottom="2dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:orientation="horizontal"
+                android:id="@+id/linearLayout_location_deal"
+                android:padding="5dp"
+                android:layout_marginRight="5dp"
+                android:weightSum="1">
+                <ImageView
+                    android:id="@+id/imageView_publicationLocation_deal"
+                    android:layout_width="15dp"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_place_black_48dp"
+                    />
+                <TextView
+                    android:id="@+id/textView_publication_locatiomn_deal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:text=""
+                    android:gravity="center"
+                    android:layout_gravity="end|center"
+
+                    android:layout_marginRight="20dp"
+                    />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:id="@+id/textView_publication_time_deal"
+                    android:layout_gravity="end|center"
+                    android:gravity="end"
+                    android:layout_weight="1"
+                    />
+            </LinearLayout>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:id="@+id/textView_publication_title_deal"
+                android:gravity="start"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_marginBottom="10dp"
+                android:textSize="16sp"
+                android:maxLines="2"
+                android:textStyle="bold"
+                android:maxLength="42"
+                android:layout_below="@+id/linearLayout_location_deal"
+                android:layout_marginRight="5dp"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:id="@+id/textView_publication_category_deal"
+                android:gravity="center"
+                android:textSize="13sp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_above="@+id/textView_publication_price_deal"/>
+
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:id="@+id/textView_publication_price_deal"
+                android:gravity="center"
+                android:layout_alignParentBottom="true"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:textColor="@color/colorgreen"/>
+
+
+        </RelativeLayout>
+
+
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorAccent"
+        android:layout_below="@+id/relative_layout_deal_activity"
+        android:id="@+id/view_viewcontent_separator"
+        android:alpha="1"
+        android:layout_marginBottom="1dp"/>
+</RelativeLayout>

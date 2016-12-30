@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="currency_xaf">FCFA</string>
-    <string name="currency_usd">DOLLAR</string>
-    <string name="currency_gbp">LIVRE</string>
-    <string name="currency_euro">EURO</string>
+    <string name="currency_xaf">F CFA</string>
     <string name="categories_prompt">Choisissez un pays</string>
     <string name="categories_post_sport_leisure">Sport, Loisirs et Jeux</string>
     <string name="categories_post_services">Services</string>
@@ -36,7 +33,7 @@
     <string name="pref_ringtone_silent">Silencieux</string>
     <string name="pref_title_add_friends_to_messages">Ajouter des amis aux méssages</string>
     <string name="pref_title_display_name">Afficher le nom</string>
-    <string name="pref_title_new_message_notifications">Nouvelle notification</string>
+    <string name="pref_title_new_message_notifications">Nouveau méssage notification</string>
     <string name="pref_title_ringtone">Sonnerie</string>
     <string name="pref_title_social_recommendations">Activer la recommandation sociale</string>
     <string name="string_toast_text_error">Erreur</string>
@@ -48,7 +45,7 @@
     <string name="string_viewcontent_category_name">Catégorie</string>
     <string name="string_viewcontent_error_post_null">Erreur. Publication vide</string>
     <string name="title_activity_settings">Paramètres</string>
-    <string name="action_location">Position actuelle</string>
+    <string name="action_location">Localité actuelle</string>
     <string name="action_location_add_new">Ajouter une Ville</string>
     <string name="action_logout">Déconnexion</string>
     <string name="action_mark_as_favorite">Marquer</string>
@@ -105,16 +102,13 @@
 
 
     <array name="currency">
-        <item>FCFA</item>
-        <item>EURO</item>
-        <item>DOLLAR</item>
-        <item>LIVRE</item>
+        <item>F CFA</item>
 
     </array>
 
 
-    <array name="categories_array_mainpage">
-        <item>Nouveau dans ta ville</item>
+    <string-array name="categories_array_createitempage">
+        <item>Choisissez une catégorie</item>
         <item>Électronique</item>
         <item>Voitures et Moteurs</item>
         <item>Mode et Accéssoires</item>
@@ -125,7 +119,7 @@
         <item>Filmes, Livres et Musique</item>
         <item>Animaux et Accéssoires</item>
         <item>Autres</item>
-    </array>
+    </string-array>
 
 
 
@@ -217,5 +211,93 @@
     <string name="error_invalid_email">Cette adrèsse e-mail est invalide</string>
     <string name="error_invalid_password">Ce mot de passe est trop court</string>
     <string name="spinner_toolbar_all_categories_tag">Toutes les Villes</string>
+    <string name="connection_to_server_not_aviable">Vous êtes déconnecté. Assurez vous que vous avez une connexion stable</string>
+    <string name="action_refresh">Actualiser</string>
+    <string name="button_toolbar_chat">Messages</string>
+    <string name="textView_category_deal">Deal</string>
+    <string name="title_activity_create_adeal">Créer un Deal</string>
+    <string name="create_post_hint_price_minimal">Prix minimal</string>
+    <string name="string_price_of_deal_negotiable">Négociable</string>
+    <string name="string_viewcontent_button_make_an_offer">Faites une offre</string>
+    <string name="all_deals">Toutes les Soldes</string>
+    <string name="action_my_deal">Mes Soldes</string>
+    <string name="imageView_viewcontent_user_header">Vendeur :</string>
+    <string name="string_viewcontent_marked_as_favorite">Ajouté à vos favoris</string>
+    <string name="string_viewcontent_my_offer">Votre offre actuelle</string>
+    <string name="string_viewcontent_unmarked_as_favorite">Suprimé de vos favoris</string>
+    <string name="view_deal_content_no_offers_yet">Vous n\'avez pas encore fais d\'offre</string>
+    <string name="viewdeal_user_opening">Actuellement</string>
+    <string name="viewdeal_user_opening_offer">offre</string>
+    <string name="viewdeal_user_opening_offers">offres</string>
+    <string name="alertDialog_viewDeal_make_offer_button_cancel">Annuler</string>
+    <string name="alertDialog_viewDeal_make_offer_button_ok">Confirmer</string>
+    <string name="alertDialog_viewDeal_make_offer_message">Le vendeur recevra une notification</string>
+    <string name="alertDialog_viewDeal_make_offer_title">Faites une offre</string>
+    <string name="button_contact_text">contacter</string>
+    <string name="string_viewcontent_mydeal_overview">Aperçu</string>
+    <string name="textView_activity_single_deal_all_offers_text">Toutes les offres actuelles</string>
+    <string name="Chat_Message_recieved_from">Nouveau méssage de</string>
+    <string name="fcm_Notification_title_message_sent">Nouveau message</string>
+    <string name="toast_text_pending">envoie</string>
+    <string name="type_your_message">Écrivez votre méssage ici</string>
+    <string name="send">Envoyer</string>
+    <string name="change_my_email">Changer mon e-mail</string>
+    <string name="fcm_Notification_new_offers_translatable">Nouvelles Offre</string>
+    <string name="fcm_Notification_new_publication_translatable">Nouvelles Publications</string>
+    <string name="fcm_Notification_title_message_sent_translatable">Nouveau message</string>
+    <string name="fcm_Notification_new_offers_message">Ne manque aucune offre sur ta marchandise</string>
+    <string name="userprofile_hint_phone_number">Numéro de téléphone</string>
+    <string name="a_week_ago">1 semaine</string>
+    <string name="alertDialog_change_phone_number">Ajouter un numéro de téléphone</string>
+    <string name="alertDialog_change_phone_number_message">un numéro de téléphone facilite la conversation</string>
+    <string name="alertDialog_no_internet_connection">Aucune connexion internet</string>
+    <string name="alertDialog_no_internet_connection_message">Vous n\'avez pas de connexion. Si vous continuez, l\'application ne fonctionnera pas correctement. Assurez vous que vous avez une connexion stable</string>
+    <string name="button_add">Ajouter</string>
+    <string name="button_later">Plus tard</string>
+    <string name="check_box_create_post_hint_is_negotiable">Négociable</string>
+    <string name="eight_days_ago">8 jours</string>
+    <string name="eleven_days_ago">11 jours</string>
+    <string name="email_hint_app">E-mail</string>
+    <string name="five_days_ago">5 jours</string>
+    <string name="four_days_ago">4 jours</string>
+    <string name="nine_days_ago">9 jours</string>
+    <string name="one_month_ago">1 mois</string>
+    <string name="password_hint_app">Mot de Passe</string>
+    <string name="six_days_ago">6 jours</string>
+    <string name="string_button_phone_change_activity">Envoyer le code de confirmation</string>
+    <string name="ten_days_ago">10 jours</string>
+    <string name="text_is_negotiable">négociable</string>
+    <string name="text_is_not_negotiable">négociable</string>
+    <string name="thirteen_days_ago">13 jours</string>
+    <string name="three_days_ago">3 jours</string>
+    <string name="three_weeks_ago">3 semaines</string>
+    <string name="twelve_days_ago">12 jours</string>
+    <string name="today">aujourd\'hui</string>
+    <string name="two_days_ago">2 jours</string>
+    <string name="two_months_ago">2 mois</string>
+    <string name="two_weeks_ago">2 semaines</string>
+    <string name="userprofile_hint_edit_phone_number">Changer de numéro de téléphone</string>
+    <string name="yesterday">hier</string>
+    <string name="alertDialogdeleteCHatt">Supprimer ce chat?</string>
+    <string name="alertDialogdeleteCHatt_message">Toutes conversations seront perdues</string>
+    <string name="app_name_ChangePhoneNumberActivity">Numéro de téléphone</string>
+    <string name="app_name_MyDealsActivity">Mes Soldes</string>
+    <string name="app_name_SingleDealActivityActivity">Ma Solde</string>
+    <string name="app_name_UserProfileActivity">Mon profil</string>
+    <string name="button_delete">Supprimer Chat</string>
+    <string name="toast_chat_deleted">Chat supprimé</string>
+    <string name="button_continue">Continuer</string>
+    <string name="fcm_Notification_new_publication_message">Nouvelles publications dans ta ville</string>
+    <string name="new_conversation">Nouveau message</string>
+    <string name="new_deal_in_your_area">Nouvelles soldes dans ta ville</string>
+    <string name="notification_new_deal_title">Nouvelles Soldes</string>
+    <string name="textView_view_deal_my_current_offer">vous avez proposé</string>
+    <string name="pref_title_new_deal_notifications">Nouvelle solde notification</string>
+    <string name="pref_title_new_publication_notifications">Nouvelle publication notification</string>
+    <string name="fcm_Notification_new_offers_translatables">Nouvelles offers</string>
+    <string name="invitation_cta">Cliquez ici</string>
+    <string name="invitation_message">"Salut, essaye cette nouvelle app "</string>
+    <string name="invitation_title">Partagez Bizness Camer avec des amis</string>
+    <string name="check_box_create_post_hint_is_for_free">Gratuit</string>
 
 </resources>

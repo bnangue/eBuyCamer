@@ -4,7 +4,8 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:animateLayoutChanges="true">
+    android:animateLayoutChanges="true"
+    android:descendantFocusability="blocksDescendants">
 
     <android.support.v7.widget.CardView
         android:id="@+id/card_view_myfavorite_cardview"
@@ -32,7 +33,7 @@
                 android:layout_height="122dp"
                 android:id="@+id/relativLayout_myfavorite_cardview"
                 android:layout_alignParentTop="true"
-                android:layout_toRightOf="@+id/imageView_publicationFirstphoto_myfavorite_cardview"
+                android:layout_toRightOf="@+id/imageView_publicationFirstphoto_myfavorite_cardview_drawer_layout"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
                 android:layout_marginLeft="10dp"
@@ -40,7 +41,7 @@
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="30dp"
+                    android:layout_height="40dp"
                     android:orientation="horizontal"
                     android:id="@+id/linearLayout_location_myfavorite_cardview"
                     android:padding="3dp"
@@ -50,9 +51,9 @@
                         android:id="@+id/textView_publication_location_myfavorite_cardview"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:text="@string/fav_cardview_location"
+                        android:text=""
                         android:gravity="start"
-                        android:layout_gravity="end"
+                        android:layout_gravity="end|center"
                         android:layout_weight="1"
                         />
 
@@ -62,13 +63,16 @@
                         android:id="@+id/textView_publication_time_myfavorite_cardview"
                         android:gravity="end"
                         android:layout_weight="1"
+                        android:layout_gravity="end|center"
+
+
 
                         />
                 </LinearLayout>
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Titre de la Publication qui est longue tres longe  oui elle "
+                    android:text=""
                     android:id="@+id/textView_publication_title_myfavorite_cardview"
                     android:gravity="start"
                     android:layout_alignParentStart="true"
@@ -84,16 +88,43 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="1.000 FCFA"
+                    android:text=""
+                    android:id="@+id/textView_publication_is_category_myfavorite_cardview"
+                    android:gravity="center"
+                    android:textSize="12sp"
+                    android:textStyle="normal"
+                    android:layout_above="@+id/textView_publication_price_myfavorite_cardview"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginBottom="5dp"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
                     android:id="@+id/textView_publication_price_myfavorite_cardview"
                     android:gravity="center"
-                    android:layout_alignParentBottom="true"
+                    android:layout_above="@+id/textView_publication_is_negotiable_myfavorite_cardview"
                     android:textSize="13sp"
                     android:textStyle="bold"
                     android:layout_alignParentStart="true"
                     android:layout_alignParentLeft="true"
                     android:textColor="@color/colorgreen"
                     android:layout_alignTop="@+id/button_myfavorite_cardview_viewer"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:id="@+id/textView_publication_is_negotiable_myfavorite_cardview"
+                    android:gravity="center"
+                    android:layout_alignParentBottom="true"
+                    android:textSize="10sp"
+                    android:textStyle="normal"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginBottom="5dp"/>
+
 
 
                 <Button
@@ -101,7 +132,7 @@
                     android:layout_height="wrap_content"
                     android:drawableLeft="@drawable/ic_remove_red_eye_black_18dp"
                     android:gravity="end|top"
-                    android:text="234"
+                    android:text=""
                     android:id="@+id/button_myfavorite_cardview_viewer"
                     style="@style/Widget.AppCompat.Button.Borderless"
                     android:layout_below="@+id/textView_publication_title_myfavorite_cardview"
@@ -112,17 +143,33 @@
                     />
             </RelativeLayout>
 
-            <ImageView
-                android:layout_width="100dp"
-                android:layout_height="100dp"
-                android:scaleType="centerInside"
-                android:adjustViewBounds="true"
-                android:id="@+id/imageView_publicationFirstphoto_myfavorite_cardview"
-                android:paddingBottom="2dp"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true" />
-
+                <RelativeLayout
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:id="@+id/imageView_publicationFirstphoto_myfavorite_cardview_drawer_layout">
+                    <ImageView
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:scaleType="centerInside"
+                        android:adjustViewBounds="true"
+                        android:id="@+id/imageView_publicationFirstphoto_myfavorite_cardview"
+                        android:paddingBottom="2dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                       />
+                    <ImageView
+                        android:id="@+id/imageView_my_favorite_sale_logo"
+                        android:layout_width="35dp"
+                        android:layout_height="35dp"
+                        android:scaleType="centerInside"
+                        android:adjustViewBounds="true"
+                        android:src="@drawable/discount"
+                        android:layout_alignParentBottom="true"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentEnd="true"
+                        android:visibility="gone"/>
+                </RelativeLayout>
 
         </RelativeLayout>
         <RelativeLayout

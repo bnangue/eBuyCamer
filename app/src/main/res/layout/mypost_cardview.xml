@@ -4,180 +4,194 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:animateLayoutChanges="true">
+    android:animateLayoutChanges="true"
+    android:descendantFocusability="blocksDescendants">
 
-        <android.support.v7.widget.CardView
-            android:id="@+id/card_view_mypost_cardview"
-            android:layout_gravity="center"
-            android:layout_width="fill_parent"
-            android:layout_height="150dp"
-            android:layout_margin="5dp"
-            card_view:cardCornerRadius="2dp"
-            >
+    <android.support.v7.widget.CardView
+        android:id="@+id/card_view_mypost_cardview"
+        android:layout_gravity="center"
+        android:layout_width="fill_parent"
+        android:layout_height="150dp"
+        android:layout_margin="5dp"
+        card_view:cardCornerRadius="2dp"
+        >
 
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="122dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginBottom="2dp"
+            android:id="@+id/relative_layout_mypost_cardview_content">
 
 
             <RelativeLayout
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="122dp"
+                android:id="@+id/relativLayout_mypost_cardview"
                 android:layout_alignParentTop="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_marginBottom="2dp"
-                android:id="@+id/relative_layout_mypost_cardview_content">
-
-
-                <RelativeLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="122dp"
-                    android:id="@+id/relativLayout_mypost_cardview"
-                    android:layout_alignParentTop="true"
-                    android:layout_toRightOf="@+id/imageView_publicationFirstphoto_mypost_cardview"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginLeft="10dp"
-                    android:paddingBottom="2dp">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="30dp"
-                        android:orientation="horizontal"
-                        android:id="@+id/linearLayout_location_mypost_cardview"
-                        android:padding="3dp"
-                        android:layout_marginRight="5dp"
-                        android:weightSum="2">
-                        <TextView
-                            android:id="@+id/textView_publication_location_mypost_cardview"
-                            android:layout_width="0dp"
-                            android:layout_height="match_parent"
-                            android:text="Location"
-                            android:gravity="start"
-                            android:layout_gravity="end"
-                            android:layout_weight="1"
-                            />
-
-                        <TextView
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:text="today"
-                            android:id="@+id/textView_publication_time_mypost_cardview"
-                            android:gravity="end"
-                            android:layout_weight="1"
-                            />
-                    </LinearLayout>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Titre de la Publication qui est longue tres longe  oui elle "
-                        android:id="@+id/textView_publication_title_mypost_cardview"
-                        android:gravity="start"
-                        android:layout_alignParentStart="true"
-                        android:layout_alignParentLeft="true"
-                        android:layout_marginBottom="20dp"
-                        android:textSize="13sp"
-                        android:maxLines="2"
-                        android:textStyle="bold"
-                        android:maxLength="42"
-                        android:layout_below="@+id/linearLayout_location_mypost_cardview"
-                        />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="1.000 FCFA"
-                        android:id="@+id/textView_publication_price_mypost_cardview"
-                        android:gravity="center"
-                        android:layout_alignParentBottom="true"
-                        android:textSize="13sp"
-                        android:textStyle="bold"
-                        android:layout_alignParentStart="true"
-                        android:layout_alignParentLeft="true"
-                        android:textColor="@color/colorgreen"
-                        android:layout_alignTop="@+id/button_mypost_cardview_viewer"/>
-
-
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:drawableLeft="@drawable/ic_remove_red_eye_black_18dp"
-                        android:gravity="end|top"
-                        android:text="234"
-                        android:id="@+id/button_mypost_cardview_viewer"
-                        style="@style/Widget.AppCompat.Button.Borderless"
-                        android:layout_below="@+id/textView_publication_title_mypost_cardview"
-                        android:layout_alignParentRight="true"
-                        android:layout_alignParentEnd="true"
-                        android:clickable="false"
-                        />
-                </RelativeLayout>
-
-                <ImageView
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:scaleType="centerInside"
-                    android:adjustViewBounds="true"
-                    android:id="@+id/imageView_publicationFirstphoto_mypost_cardview"
-                    android:paddingBottom="2dp"
-                    android:layout_alignParentTop="true"
-                    android:layout_alignParentLeft="true"
-                    android:layout_alignParentStart="true" />
-
-
-            </RelativeLayout>
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:id="@+id/relative_layout_mypost_cardview_buttons"
-                android:layout_gravity="bottom">
+                android:layout_toRightOf="@+id/imageView_publicationFirstphoto_mypost_cardview"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginLeft="10dp"
+                android:paddingBottom="2dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal">
-
-                    <Button
-                        android:id="@+id/button_edit_mypost_cardview"
+                    android:layout_height="40dp"
+                    android:orientation="horizontal"
+                    android:id="@+id/linearLayout_location_mypost_cardview"
+                    android:padding="3dp"
+                    android:layout_marginRight="5dp"
+                    android:weightSum="2">
+                    <TextView
+                        android:id="@+id/textView_publication_location_mypost_cardview"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:text=""
+                        android:gravity="start"
+                        android:layout_gravity="end|center"
                         android:layout_weight="1"
+                        />
+
+                    <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:drawableLeft="@drawable/ic_mode_edit_black_24dp"
-                        style="@style/Base.Widget.AppCompat.Button.Borderless"/>
-
-                    <Button
-                        android:id="@+id/button_delete_mypost_cardview"
+                        android:text=""
+                        android:id="@+id/textView_publication_time_mypost_cardview"
+                        android:layout_gravity="end|center"
+                        android:gravity="end"
                         android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:drawableLeft="@drawable/ic_delete_black_24dp"
-                        style="@style/Base.Widget.AppCompat.Button.Borderless"/>
-
-                    <Button
-                        android:id="@+id/button_share_mypost_cardview"
-                        android:layout_weight="1"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:drawableLeft="@drawable/ic_share_black_24dp"
-                        style="@style/Base.Widget.AppCompat.Button.Borderless"/>
-
-                    <Button
-                        android:id="@+id/button_promote_mypost_cardview"
-                        android:layout_weight="4"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:text="@string/button_promote_mypost_cardview"
-                        style="@style/Base.Widget.AppCompat.Button.Borderless"
-                        android:textColor="@color/authui_colorPrimary"
-                        android:textSize="10sp"
-                        android:gravity="end|center"
-                        android:drawableRight="@drawable/ic_arrow_upward_black_24dp"
-
-
                         />
                 </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:id="@+id/textView_publication_title_mypost_cardview"
+                    android:gravity="start"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginBottom="20dp"
+                    android:textSize="13sp"
+                    android:maxLines="2"
+                    android:textStyle="bold"
+                    android:maxLength="42"
+                    android:layout_below="@+id/linearLayout_location_mypost_cardview"
+                    />
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:id="@+id/textView_publication_price_mypost_cardview"
+                    android:gravity="center"
+                    android:layout_below="@+id/textView_publication_is_negotiable_mypost_cardview"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:textColor="@color/colorgreen"
+                    android:layout_alignTop="@+id/button_mypost_cardview_viewer"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:id="@+id/textView_publication_is_negotiable_mypost_cardview"
+                    android:gravity="center"
+                    android:layout_alignParentBottom="true"
+                    android:textSize="10sp"
+                    android:textStyle="normal"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginBottom="5dp"/>
+
+
+                <Button
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_remove_red_eye_black_18dp"
+                    android:gravity="end|top"
+                    android:text=""
+                    android:id="@+id/button_mypost_cardview_viewer"
+                    style="@style/Widget.AppCompat.Button.Borderless"
+                    android:layout_below="@+id/textView_publication_title_mypost_cardview"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true"
+                    android:clickable="false"
+                    />
             </RelativeLayout>
 
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:scaleType="centerInside"
+                android:adjustViewBounds="true"
+                android:id="@+id/imageView_publicationFirstphoto_mypost_cardview"
+                android:paddingBottom="2dp"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
 
-        </android.support.v7.widget.CardView>
+
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:id="@+id/relative_layout_mypost_cardview_buttons"
+            android:layout_gravity="bottom">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/button_edit_mypost_cardview"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_mode_edit_black_24dp"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"/>
+
+                <Button
+                    android:id="@+id/button_delete_mypost_cardview"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_delete_black_24dp"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"/>
+
+                <Button
+                    android:id="@+id/button_share_mypost_cardview"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:drawableLeft="@drawable/ic_share_black_24dp"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"/>
+
+                <Button
+                    android:id="@+id/button_promote_mypost_cardview"
+                    android:layout_weight="4"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/button_promote_mypost_cardview"
+                    style="@style/Base.Widget.AppCompat.Button.Borderless"
+                    android:textColor="@color/authui_colorPrimary"
+                    android:textSize="10sp"
+                    android:gravity="end|center"
+                    android:drawableRight="@drawable/ic_arrow_upward_black_24dp"
+
+
+                    />
+            </LinearLayout>
+
+        </RelativeLayout>
+
+
+    </android.support.v7.widget.CardView>
 
 </LinearLayout>

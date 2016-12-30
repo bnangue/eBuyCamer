@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+
+    <item android:id="@+id/action_refresh_viewdeal"
+        android:icon="@drawable/ic_refresh_white_36dp"
+        android:title="@string/action_refresh"
+        app:showAsAction="ifRoom|withText" />
+
+    <item android:id="@+id/action_mydeal_viewdeal"
+        android:title="@string/action_my_deal"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/action_user_profile_category_viewdeal"
+        android:title="@string/action_user_profile"
+        app:showAsAction="never"
+        />
+
+    <item android:id="@+id/action_settings_viewdeal"
+        android:title="@string/action_settings"
+        app:showAsAction="never" />
+
+</menu>
