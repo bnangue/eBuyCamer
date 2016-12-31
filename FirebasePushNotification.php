@@ -14,6 +14,7 @@ $title = $_POST["title"];
 $post_id = $_POST['post_id'];
 $creator_uid = $_POST["creator_uid"];
 $is_deal = $_POST["is_deal"];
+$sender_uid = $_POST["sender_uid"];
 
 $apiKey ='AAAApknq7Pw:APA91bFuuVyG1O7VGmzNG3R8Fdfk-4eZjCPmV6Le3dQzJ32LDJ_KrpWdkYeyfTKG5BIX8vAhlk9Wcs3-G-35A_kGSlHhA8zslX4zzVSugyHnGHIY6TU3Pch7qpBh0aR1k8QQzPHvNzA5JO3gc3KRnJQWUM_3R_rs4w';
 
@@ -21,7 +22,7 @@ $url = 'https://fcm.googleapis.com/fcm/send';
  
 $fields = array(
                 'registration_ids'  => array( $receivertoken ),
-                'data'              => array( "message" => $message ,"sender" => $sender,"receiver" => $receiver,
+                'data'              => array( "message" => $message ,"sender" => $sender,"receiver" => $receiver, "sender_uid" => $sender_uid,
                 	"foreign_uid"=>$foreign_uid, "title" => $title, "post_id" => $post_id, "creator_uid" => $creator_uid, "is_deal" => $is_deal)
                 );
  

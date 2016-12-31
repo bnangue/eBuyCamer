@@ -72,6 +72,7 @@ import java.util.Map;
 public class ChatActivity extends AppCompatActivity implements View.OnClickListener {
 
     public static boolean messageshowed= true;
+    public static String chatpartner_uid;
     private TextView mUserMessageChatText;
     private ListView listView_chat;
 
@@ -95,13 +96,17 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     private ChildEventListener childEventListener;
     private List<MessageChatModel> newMessages=new ArrayList<>();
     private FirebaseUser user;
-    private String post_id;
-    private String creator_uid;
+    private   String post_id;
+    private   String creator_uid;
+    public static String post_id_not;
+    public static String creator_uid_not;
+
     private UserPublic creator_profile, receiver_profile;
     private String is_deal;
     private String chat_first_pic,chat_title;
     private  PrivateContent postcontent;
     private String[] currencyArray;
+    private UserSharedPreference userSharedPreference;
 
 
     public boolean haveNetworkConnection() {
@@ -126,7 +131,10 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
+        userSharedPreference=new UserSharedPreference(this);
+
         messageshowed=false;
+
         Bundle extras = getIntent().getExtras();
         if(extras!=null){
             if(extras.containsKey("key")){
@@ -143,6 +151,9 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
 
+        chatpartner_uid=foreign_uid;
+        creator_uid_not=creator_uid;
+        post_id_not=post_id;
 
         currencyArray=getResources().getStringArray(R.array.currency);
         editText=(EditText)findViewById(R.id.chat_user_message);
@@ -163,11 +174,28 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
         auth=FirebaseAuth.getInstance();
+        userSharedPreference.setUserDataRefreshed(haveNetworkConnection());
         if(auth!=null){
             user=auth.getCurrentUser();
         }else {
-            startActivity(new Intent(ChatActivity.this,MainActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+
+            if(userSharedPreference.getUserLoggedIn()){
+                // user offline
+                if(!userSharedPreference.getUserDataRefreshed()){
+                    // user refreshed data on start
+                }
+
+            }else {
+                // user online but auth problem
+                Toast.makeText(this,getString(R.string.problem_while_loading_user_data_auth_null),Toast.LENGTH_LONG).show();
+
+                startActivity(new Intent(ChatActivity.this,MainActivity.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                Intent.FLAG_ACTIVITY_NEW_TASK));
+                finish();
+            }
+
         }
 
         if(post_id!=null && is_deal.equals("deal")){
@@ -181,16 +209,20 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot!=null){
                         postcontent=dataSnapshot.getValue(PrivateContent.class);
-                        chat_first_pic=postcontent.getFirstPicture();
-                        chat_title=postcontent.getTitle();
-                        populatePost(postcontent);
-                        img.setVisibility(View.VISIBLE);
+
+                        if(postcontent!=null){
+                            chat_first_pic=postcontent.getFirstPicture();
+                            chat_title=postcontent.getTitle();
+                            populatePost(postcontent);
+                            img.setVisibility(View.VISIBLE);
+                        }
 
                     }
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
+                    Toast.makeText(getApplicationContext(),databaseError.getMessage(),Toast.LENGTH_SHORT).show();
 
                 }
             });
@@ -203,23 +235,30 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 public void onDataChange(DataSnapshot dataSnapshot) {
 
                     if (dataSnapshot!=null){
-                        postcontent=dataSnapshot.getValue(PrivateContent.class);
-                        chat_first_pic=postcontent.getFirstPicture();
-                        chat_title=postcontent.getTitle();
-                        populatePost(postcontent);
 
+                        postcontent=dataSnapshot.getValue(PrivateContent.class);
+
+                        if (postcontent!=null){
+                            chat_first_pic=postcontent.getFirstPicture();
+                            chat_title=postcontent.getTitle();
+                            populatePost(postcontent);
+                        }
                     }
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
 
+                    Toast.makeText(getApplicationContext(),databaseError.getMessage(),Toast.LENGTH_SHORT).show();
                 }
             });
         }
 
         getSupportActionBar().setTitle(null);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+
         root= FirebaseDatabase.getInstance().getReference();
+
         if(creator_uid!=null && post_id!=null && foreign_uid!=null){
 
             DatabaseReference refprofile =root.child(ConfigApp.FIREBASE_APP_URL_USERS)
@@ -228,8 +267,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if(dataSnapshot!=null){
-                        UserPublic userPublic=dataSnapshot.getValue(UserPublic.class);
-                        creator_profile=userPublic;
+                        creator_profile= dataSnapshot.getValue(UserPublic.class);
                     }else {
                         //user do not exist
                         finish();
@@ -238,6 +276,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
+                    Toast.makeText(getApplicationContext(),databaseError.getMessage(),Toast.LENGTH_SHORT).show();
 
                 }
             });
@@ -258,8 +297,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if(dataSnapshot!=null){
-                        UserPublic userPublic=dataSnapshot.getValue(UserPublic.class);
-                        receiver_profile=userPublic;
+                        receiver_profile= dataSnapshot.getValue(UserPublic.class);
                         getSupportActionBar().setCustomView(R.layout.chat_action_bar_layout);
                         getSupportActionBar().setDisplayShowTitleEnabled(false);
                         getSupportActionBar().setDisplayShowCustomEnabled(true);
@@ -271,12 +309,32 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                         CircularImageView imageView=(CircularImageView)getSupportActionBar().getCustomView().findViewById(R.id.imageView_viewcontent_userpic_actionBarLayout);
                         TextView name=(TextView) getSupportActionBar().getCustomView().findViewById(R.id.textView_viewcontent_user_name_actionBarLayout);
 
+
                         if(creator_uid.equals(user.getUid())){
-                            name.setText(receiver_profile.getName());
-                            loadPicture(receiver_profile.getProfilePhotoUri(),imageView);
+                            if (receiver_profile!=null){
+                                name.setText(receiver_profile.getName());
+                                if (receiver_profile.getProfilePhotoUri()!=null){
+                                    loadPicture(receiver_profile.getProfilePhotoUri(),imageView);
+
+                                }
+                            }else {
+                                if (!haveNetworkConnection()){
+                                    Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
                         }else {
-                            name.setText(creator_profile.getName());
-                            loadPicture(creator_profile.getProfilePhotoUri(),imageView);
+                            if (creator_profile!=null){
+                                if (creator_profile.getProfilePhotoUri()!=null){
+                                    loadPicture(creator_profile.getProfilePhotoUri(),imageView);
+                                }
+                                name.setText(creator_profile.getName());
+                            }else {
+                                if (!haveNetworkConnection()){
+                                    Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
+                                }
+                            }
+
                         }
 
                     }else {
@@ -287,6 +345,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
+                    Toast.makeText(getApplicationContext(),databaseError.getMessage(),Toast.LENGTH_SHORT).show();
 
                 }
             });
@@ -299,6 +358,7 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
+                    Toast.makeText(getApplicationContext(),databaseError.getMessage(),Toast.LENGTH_SHORT).show();
 
                 }
             });
@@ -310,21 +370,17 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
+                    Toast.makeText(getApplicationContext(),databaseError.getMessage(),Toast.LENGTH_SHORT).show();
 
                 }
             });
-        }
-
-        if (!haveNetworkConnection()){
-            Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                    ,Toast.LENGTH_SHORT).show();
         }
 
     }
 
     private void sendMessage() {
 
-        if(creator_uid!=null && post_id!=null && foreign_uid!=null){
+        if(creator_uid!=null && post_id!=null && foreign_uid!=null && reciever_token!=null){
 
             DatabaseReference message_root=root.child(ConfigApp.FIREBASE_APP_URL_CHATS)
                     .child(creator_uid)
@@ -350,13 +406,22 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                                 if(!task.isSuccessful()){
                                     Toast.makeText(getApplicationContext(),getString(R.string.toast_text_pending)
                                             ,Toast.LENGTH_SHORT).show();
+                                    if (!haveNetworkConnection()){
+                                        Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
+                                    }
                                 }else {
+                                    sendNotification(message);
+                                    if(receiver_profile!=null && creator_profile!=null){
                                         ChatLoad chatLoad=new ChatLoad(
                                                 receiver_profile.getName(),creator_uid,post_id,foreign_uid,message,System.currentTimeMillis()
-                                        ,chat_first_pic,chat_title,is_deal,true,creator_profile.getName());
+                                                ,chat_first_pic,chat_title,is_deal,true,creator_profile.getName());
                                         createMychat(chatLoad);
+                                    }else {
+                                        if (!haveNetworkConnection()){
+                                            Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
 
-                                    sendNotification(message);
                                 }
                             }
 
@@ -374,13 +439,19 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-        openViewContent(postcontent);
+        if (postcontent!= null){
+            openViewContent(postcontent);
+        }else {
+            Toast.makeText(getApplicationContext(),getString(R.string.action_not_avialable_or_offline),Toast.LENGTH_SHORT).show();
+        }
+
     }
 
 
     private void populatePost(PrivateContent content){
+
         textView_post_title.setText(content.getTitle());
-        DecimalFormat decFmt = new DecimalFormat("#,###.##", DecimalFormatSymbols.getInstance(Locale.GERMAN));
+        DecimalFormat decFmt = new DecimalFormat("#,###.##", DecimalFormatSymbols.getInstance(Locale.FRENCH));
         decFmt.setMaximumFractionDigits(2);
         decFmt.setMinimumFractionDigits(2);
 
@@ -400,50 +471,41 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
             textView_post_price.setText(preValue);
         }
 
-        byte[] decodedString = Base64.decode(content.getFirstPicture(), Base64.DEFAULT);
-        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+        if (content.getFirstPicture()!=null){
+            byte[] decodedString = Base64.decode(content.getFirstPicture(), Base64.DEFAULT);
+            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
 
-        postPic.setImageBitmap(decodedByte);
+            postPic.setImageBitmap(decodedByte);
+        }
+
     }
 
 
     private void openViewContent(PrivateContent postcontent) {
         if(postcontent.getCategorie().getCatNumber()==20){
+            if(postcontent.getCreatorid().equals(user.getUid())){
+                startActivity(new Intent(ChatActivity.this,SingleDealActivityActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        .putExtra("user_uid",postcontent.getCreatorid())
+                        .putExtra("dealid",postcontent.getUniquefirebaseId()));
 
-            if (!haveNetworkConnection()){
-                Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                        ,Toast.LENGTH_SHORT).show();
+
             }else {
-                if(postcontent.getCreatorid().equals(user.getUid())){
-                    startActivity(new Intent(ChatActivity.this,SingleDealActivityActivity.class)
-                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            .putExtra("user_uid",postcontent.getCreatorid())
-                            .putExtra("dealid",postcontent.getUniquefirebaseId()));
+                startActivity(new Intent(ChatActivity.this,ViewContentDealActivity.class)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        .putExtra("user_uid",postcontent.getCreatorid())
+                        .putExtra("post",postcontent.getUniquefirebaseId()));
 
-
-                }else {
-                    startActivity(new Intent(ChatActivity.this,ViewContentDealActivity.class)
-                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                            .putExtra("user_uid",postcontent.getCreatorid())
-                            .putExtra("post",postcontent.getUniquefirebaseId()));
-
-                }
             }
-
            // Deal
         }else {
 
             //Post
-            if (!haveNetworkConnection()){
-                Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                        ,Toast.LENGTH_SHORT).show();
-            }else {
-                startActivity(new Intent(ChatActivity.this,ViewContentActivity.class)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        .putExtra("post",postcontent.getUniquefirebaseId())
-                        .putExtra("location",postcontent.getLocation().getName())
-                        .putExtra("categorie",postcontent.getCategorie().getName()));
-            }
+            startActivity(new Intent(ChatActivity.this,ViewContentActivity.class)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    .putExtra("post",postcontent.getUniquefirebaseId())
+                    .putExtra("location",postcontent.getLocation().getName())
+                    .putExtra("categorie",postcontent.getCategorie().getName()));
         }
     }
 
@@ -476,11 +538,13 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                     data.add(new Pair<String, String>("receivertoken",reciever_token));
                     data.add(new Pair<String, String>("receiver",receiver_profile.getName()));
                     data.add(new Pair<String, String>("sender", creator_profile.getName() ));
+                    data.add(new Pair<String, String>("sender_uid", creator_profile.getUniquefirebasebId() ));
 
                 }else {
                     data.add(new Pair<String, String>("receivertoken",creator_token));
                     data.add(new Pair<String, String>("receiver",creator_profile.getName()));
                     data.add(new Pair<String, String>("sender", receiver_profile.getName() ));
+                    data.add(new Pair<String, String>("sender_uid", receiver_profile.getUniquefirebasebId() ));
                 }
 
                 data.add(new Pair<String, String>("title",title ));
@@ -533,6 +597,9 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     protected void onStart() {
         super.onStart();
         messageshowed=false;
+        chatpartner_uid=foreign_uid;
+        creator_uid_not=creator_uid;
+        post_id_not=post_id;
 
     }
 
@@ -592,6 +659,10 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
                 }});
            // listView_chat.smoothScrollToPosition(adapter.getCount() -1);
 
+        }else {
+            if (!haveNetworkConnection()){
+                Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -640,6 +711,9 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
     protected void onStop() {
         super.onStop();
         messageshowed=true;
+        chatpartner_uid=null;
+        creator_uid_not=null;
+        post_id_not=null;
 
     }
 
@@ -648,6 +722,9 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         super.onPause();
         messageshowed=true;
 
+        chatpartner_uid=null;
+        creator_uid_not=null;
+        post_id_not=null;
     }
 
     @Override
@@ -656,6 +733,9 @@ public class ChatActivity extends AppCompatActivity implements View.OnClickListe
         messageshowed=false;
         loadChat();
         MyFireBaseMessagingService.notificationId=0;
+        chatpartner_uid=foreign_uid;
+        creator_uid_not=creator_uid;
+        post_id_not=post_id;
 
 
     }

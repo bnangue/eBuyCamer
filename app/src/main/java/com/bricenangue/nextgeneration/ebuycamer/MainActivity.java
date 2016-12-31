@@ -87,7 +87,10 @@ public class MainActivity extends AppCompatActivity {
 
         progressBar=(ProgressBar)findViewById(R.id.progress_bar_main_activity);
 
+        userSharedPreference.setUserDataRefreshed(haveNetworkConnection());
+
             if (haveNetworkConnection()){
+
                 showProgressbar();
                 GoogleApiAvailability api = GoogleApiAvailability.getInstance();
                 int code = api.isGooglePlayServicesAvailable(this);
@@ -122,37 +125,24 @@ public class MainActivity extends AppCompatActivity {
                                 verifyMail(user);
                             }else {
                                 auth.signOut();
-                                dismissProgressbar();
-                                startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
-                                        .setProviders(AuthUI.EMAIL_PROVIDER,
-                                                AuthUI.FACEBOOK_PROVIDER)
-                                        .setIsSmartLockEnabled(!BuildConfig.DEBUG)
-                                        .setTheme(R.style.AppTheme)
-                                        .build(),FB_SIGN_IN);
 
+                                dismissProgressbar();
+                                Toast.makeText(this,getString(R.string.problem_while_loading_user_data_not_identify),Toast.LENGTH_LONG).show();
+                                prepareFirebaseUI();
                             }
 
 
                         }else {
 
                             dismissProgressbar();
-
-                            startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
-                                    .setProviders(AuthUI.EMAIL_PROVIDER,
-                                            AuthUI.FACEBOOK_PROVIDER)
-                                    .setIsSmartLockEnabled(!BuildConfig.DEBUG)
-                                    .setTheme(R.style.AppTheme)
-                                    .build(),FB_SIGN_IN);
+                            Toast.makeText(this,getString(R.string.problem_while_loading_user_data),Toast.LENGTH_LONG).show();
+                            prepareFirebaseUI();
                         }
                     }else {
                         dismissProgressbar();
 
-                        startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
-                                .setProviders(AuthUI.EMAIL_PROVIDER,
-                                        AuthUI.FACEBOOK_PROVIDER)
-                                .setIsSmartLockEnabled(!BuildConfig.DEBUG)
-                                .setTheme(R.style.AppTheme)
-                                .build(),FB_SIGN_IN);
+                        Toast.makeText(this,getString(R.string.problem_while_loading_user_data_auth_null),Toast.LENGTH_LONG).show();
+                        prepareFirebaseUI();
                     }
 
                 }else {
@@ -172,17 +162,11 @@ public class MainActivity extends AppCompatActivity {
             }else {
 
                if(userSharedPreference.getUserLoggedIn()){
-                   dismissProgressbar();
                    noConnectionContinue();
                }else {
                    dismissProgressbar();
 
-                   startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
-                           .setProviders(AuthUI.EMAIL_PROVIDER,
-                                   AuthUI.FACEBOOK_PROVIDER)
-                           .setIsSmartLockEnabled(!BuildConfig.DEBUG)
-                           .setTheme(R.style.AppTheme)
-                           .build(),FB_SIGN_IN);
+                   prepareFirebaseUI();
                }
             }
 
@@ -203,11 +187,32 @@ public class MainActivity extends AppCompatActivity {
                 , new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        alertDialog.dismiss();
-                        startActivity(new Intent(MainActivity.this,CategoryActivity.class)
-                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-                        finish();
-                        dismissProgressbar();
+
+
+                        Locations user_location=userSharedPreference.getUserLocation();
+                        if(user_location!=null){
+                            if(!user_location.getName().isEmpty() && user_location.getNumberLocation()!=-1){
+                                startActivity(new Intent(MainActivity.this,CategoryActivity.class)
+                                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                                alertDialog.dismiss();
+                                dismissProgressbar();
+                                finish();
+                            }else {
+                                startActivity(new Intent(MainActivity.this,LocationsActivity.class)
+                                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                                alertDialog.dismiss();
+                                dismissProgressbar();
+                                finish();
+                            }
+
+                        }else {
+                            startActivity(new Intent(MainActivity.this,LocationsActivity.class)
+                                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                            alertDialog.dismiss();
+                            dismissProgressbar();
+                            finish();
+                        }
+
                     }
                 });
         alertDialog.setCancelable(false);
@@ -219,7 +224,6 @@ public class MainActivity extends AppCompatActivity {
         final DatabaseReference ref=root.child(ConfigApp.FIREBASE_APP_URL_USERS).
                 child(user.getUid()).child("userPublic")
                 ;
-       // ref.child("chatId").setValue(FirebaseInstanceId.getInstance().getToken());
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -229,8 +233,10 @@ public class MainActivity extends AppCompatActivity {
 
                 userSharedPreference.storeUserData(dataSnapshot.getValue(UserPublic.class));
                 userSharedPreference.setUserLoggedIn(true);
+                userSharedPreference.setUserDataRefreshed(true);
 
-                //ref.child("name").setValue(user.getDisplayName());
+                userSharedPreference.setEmailVerified(user.isEmailVerified());
+
 
                 if (dataSnapshot.hasChild("Location")){
 
@@ -273,9 +279,17 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         //user.sendEmailVerification();
+                        user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                Toast.makeText(getApplicationContext()
+                                        ,getString(R.string.problem_while_loading_user_data_verifaction_email_resent)
+                                                +" "+ user.getEmail(),Toast.LENGTH_LONG).show();
+                            }
+                        });
 
                        procide(user);
-                        user.sendEmailVerification();
+
                         alertDialog.dismiss();
                         dismissProgressbar();
 
@@ -289,26 +303,36 @@ public class MainActivity extends AppCompatActivity {
     private void saveprofilePicture(FirebaseUser user){
         String facebookUserId = "";
         // find the Facebook profile and get the user's id
-        for(UserInfo profile : user.getProviderData()) {
+        List<? extends UserInfo> list=user.getProviderData();
+        String providerId=list.get(1).getProviderId();
+
             // check if the provider id matches "facebook.com"
-            if(profile.getProviderId().equals(getString(R.string.facebook_provider_id))) {
-                facebookUserId = profile.getUid();
+            if(providerId.equals(getString(R.string.facebook_provider_id))) {
+                facebookUserId = list.get(1).getUid();
             }
-        }
+
         // construct the URL to the profile picture, with a custom height
         // alternatively, use '?type=small|medium|large' instead of ?height=
         final String photoUrl = "https://graph.facebook.com/" + facebookUserId + "/picture?type=large";
         DatabaseReference reference=FirebaseDatabase.getInstance().getReference();
-        reference.child(ConfigApp.FIREBASE_APP_URL_USERS).child(auth.getCurrentUser().getUid())
-                .child("userPublic").child("profilePhotoUri").setValue(photoUrl)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-
-                    }
-                });
+        reference.child(ConfigApp.FIREBASE_APP_URL_USERS).child(user.getUid())
+                .child("userPublic").child("profilePhotoUri").setValue(photoUrl);
 
     }
+
+
+    void prepareFirebaseUI(){
+        startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
+                .setProviders(AuthUI.EMAIL_PROVIDER,
+                        AuthUI.FACEBOOK_PROVIDER)
+                .setIsSmartLockEnabled(!BuildConfig.DEBUG)
+                .setTheme(R.style.AppTheme)
+                .build(),FB_SIGN_IN);
+
+    }
+
+
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -320,41 +344,41 @@ public class MainActivity extends AppCompatActivity {
                 boolean ispassword =false;
                 final FirebaseUser user=auth.getCurrentUser();
 
-                assert user != null;
-                for(UserInfo profile : user.getProviderData()) {
-                    // check if the provider id matches "facebook.com"
-                    if(profile.getProviderId().equals(getString(R.string.facebook_provider_id))) {
+                if(user!=null){
 
+
+                    List<? extends UserInfo> list=user.getProviderData();
+                    String providerId=list.get(1).getProviderId();
+                    if(providerId.equals(getString(R.string.facebook_provider_id))) {
                         isfacebook=true;
 
-                    }else if (profile.getProviderId().equals(getString(R.string.password_provider_id))){
-
+                    }else if (providerId.equals(getString(R.string.password_provider_id))){
                         ispassword=true;
                     }
-                }
-                final String email=user.getEmail();
-                final String uid=user.getUid();
-                final String name = user.getDisplayName();
+
+                    final String email=user.getEmail();
+                    final String uid=user.getUid();
+                    final String name = user.getDisplayName();
 
 
-                final DatabaseReference ref =root.child(ConfigApp.FIREBASE_APP_URL_USERS)
-                        .child(uid);
-                final UserPublic userfb=new UserPublic();
+                    final DatabaseReference ref =root.child(ConfigApp.FIREBASE_APP_URL_USERS)
+                            .child(uid);
+                    final UserPublic userfb=new UserPublic();
 
-                final boolean emailVerified=user.isEmailVerified();
-                userSharedPreference.setEmailVerified(emailVerified);
-                userfb.setEmail(email);
+                    final boolean emailVerified=user.isEmailVerified();
+                    userSharedPreference.setEmailVerified(emailVerified);
+                    userfb.setEmail(email);
 
-                userfb.setName(name);
+                    userfb.setName(name);
 
-                userfb.setUniquefirebasebId(uid);
+                    userfb.setUniquefirebasebId(uid);
 
-                Map<String,Object> children=new HashMap<>();
+                    Map<String,Object> children=new HashMap<>();
 
-                DatabaseReference refAds=root.child(ConfigApp.FIREBASE_APP_URL_USERS_POSTS_USER).child(user.getUid());
-                final boolean finalIsfacebook = isfacebook;
-                final boolean finalIspassword = ispassword;
-                refAds.addListenerForSingleValueEvent(new ValueEventListener() {
+                    DatabaseReference refAds=root.child(ConfigApp.FIREBASE_APP_URL_USERS_POSTS_USER).child(user.getUid());
+                    final boolean finalIsfacebook = isfacebook;
+                    final boolean finalIspassword = ispassword;
+                    refAds.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             //user already register
@@ -365,194 +389,119 @@ public class MainActivity extends AppCompatActivity {
 
                                 final DatabaseReference refUSerPublice=ref.child("userPublic");
 
-                                refUSerPublice.addListenerForSingleValueEvent(new ValueEventListener() {
+                                Map<String,Object> children=new HashMap<>();
+                                children.put("/email",userfb.getEmail());
+                                children.put("/name",userfb.getName());
+                                children.put("/numberOfAds",userfb.getNumberOfAds());
+                                children.put("/uniquefirebasebId",userfb.getUniquefirebasebId());
+                                children.put("/chatId",FirebaseInstanceId.getInstance().getToken());
+
+                                refUSerPublice.updateChildren(children).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        if(dataSnapshot.hasChildren()){
-                                            Map<String,Object> children=new HashMap<>();
-                                            children.put("/email",userfb.getEmail());
-                                            children.put("/name",userfb.getName());
-                                            children.put("/numberOfAds",userfb.getNumberOfAds());
-                                            children.put("/uniquefirebasebId",userfb.getUniquefirebasebId());
-                                            children.put("/chatId",FirebaseInstanceId.getInstance().getToken());
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isComplete() && task.isSuccessful()){
+                                            if(finalIsfacebook){
+                                                procide(user);
+                                                saveprofilePicture(user);
 
-                                            refUSerPublice.updateChildren(children).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if(task.isComplete() && task.isSuccessful()){
-                                                        if(finalIsfacebook){
-                                                            procide(user);
-                                                            saveprofilePicture(user);
 
-                                                        }else if ( !emailVerified && finalIspassword){
-                                                            verifyMail(user);
+                                            }else if ( !emailVerified && finalIspassword){
+                                                user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
 
-                                                        }else if (emailVerified && finalIspassword ){
-                                                            procide(user);
-                                                        }
-                                                    }else {
-                                                        showErrorSignInAndRelaunch("7");
-                                                        dismissProgressbar();
+                                                        verifyMail(user);
 
                                                     }
-                                                }
-                                            });
+                                                });
+                                            }else if (emailVerified && finalIspassword ){
+                                                procide(user);
+                                            }
                                         }else {
-                                            Map<String,Object> children=new HashMap<>();
-                                            children.put("/email",userfb.getEmail());
-                                            children.put("/name",userfb.getName());
-                                            children.put("/numberOfAds",userfb.getNumberOfAds());
-                                            children.put("/uniquefirebasebId",userfb.getUniquefirebasebId());
-                                            children.put("/chatId",FirebaseInstanceId.getInstance().getToken());
+                                            showErrorSignInAndRelaunch(getString(R.string.Error_while_updating_user_profile_information));
+                                            dismissProgressbar();
 
-                                            refUSerPublice.updateChildren(children).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if(task.isComplete() && task.isSuccessful()){
-                                                        if(finalIsfacebook){
-                                                            procide(user);
-                                                            saveprofilePicture(user);
-
-
-                                                        }else if ( !emailVerified && finalIspassword){
-                                                            user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                @Override
-                                                                public void onComplete(@NonNull Task<Void> task) {
-
-                                                                    verifyMail(user);
-
-                                                                }
-                                                            });
-                                                        }else if (emailVerified && finalIspassword ){
-                                                            procide(user);
-                                                        }
-                                                    }else {
-                                                        showErrorSignInAndRelaunch("1");
-                                                        dismissProgressbar();
-
-                                                    }
-                                                }
-                                            });
                                         }
-
-                                    }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-                                        showErrorSignInAndRelaunch(databaseError.getMessage()+"5");
-                                        dismissProgressbar();
-
                                     }
                                 });
+
                             }else {
                                 userfb.setNumberOfAds(0);
                                 userSharedPreference.setUserNumberofAds(0);
                                 final DatabaseReference refUSerPublice=ref.child("userPublic");
-                                refUSerPublice.addListenerForSingleValueEvent(new ValueEventListener() {
+                                Map<String,Object> children=new HashMap<>();
+                                children.put("/email",userfb.getEmail());
+                                children.put("/name",userfb.getName());
+                                children.put("/numberOfAds",userfb.getNumberOfAds());
+                                children.put("/uniquefirebasebId",userfb.getUniquefirebasebId());
+                                children.put("/chatId",FirebaseInstanceId.getInstance().getToken());
+
+                                refUSerPublice.updateChildren(children).addOnCompleteListener(new OnCompleteListener<Void>() {
                                     @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        if(dataSnapshot.hasChildren()){
-                                            Map<String,Object> children=new HashMap<>();
-                                            children.put("/email",userfb.getEmail());
-                                            children.put("/name",userfb.getName());
-                                            children.put("/numberOfAds",userfb.getNumberOfAds());
-                                            children.put("/uniquefirebasebId",userfb.getUniquefirebasebId());
-                                            children.put("/chatId",FirebaseInstanceId.getInstance().getToken());
-
-                                            refUSerPublice.updateChildren(children).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if(task.isComplete() && task.isSuccessful()){
-                                                        if(finalIsfacebook){
-                                                            procide(user);
-                                                            saveprofilePicture(user);
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if(task.isComplete() && task.isSuccessful()){
+                                            if(finalIsfacebook){
+                                                procide(user);
+                                                saveprofilePicture(user);
 
 
-                                                        }else if ( !emailVerified && finalIspassword){
-                                                            verifyMail(user);
+                                            }else if ( !emailVerified && finalIspassword){
+                                                verifyMail(user);
 
-                                                        }else if (emailVerified && finalIspassword ){
-                                                            procide(user);
-                                                        }
-                                                    }else {
-                                                        showErrorSignInAndRelaunch("4");
-                                                        dismissProgressbar();
-                                                    }
-                                                }
-                                            });
+                                            }else if (emailVerified && finalIspassword ){
+                                                procide(user);
+                                            }
                                         }else {
-                                            Map<String,Object> children=new HashMap<>();
-                                            children.put("/email",userfb.getEmail());
-                                            children.put("/name",userfb.getName());
-                                            children.put("/numberOfAds",userfb.getNumberOfAds());
-                                            children.put("/uniquefirebasebId",userfb.getUniquefirebasebId());
-                                            children.put("/chatId",FirebaseInstanceId.getInstance().getToken());
-
-                                            refUSerPublice.updateChildren(children).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-                                                    if(task.isComplete() && task.isSuccessful()){
-                                                        if(finalIsfacebook){
-                                                            procide(user);
-                                                            saveprofilePicture(user);
-
-
-                                                        }else if ( !emailVerified && finalIspassword){
-                                                            user.sendEmailVerification().addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                                @Override
-                                                                public void onComplete(@NonNull Task<Void> task) {
-
-                                                                    verifyMail(user);
-                                                                }
-                                                            });
-                                                        }else if (emailVerified && finalIspassword ){
-                                                            procide(user);
-                                                        }
-                                                    }else {
-                                                      showErrorSignInAndRelaunch("3");
-                                                        dismissProgressbar();
-                                                    }
-                                                }
-                                            });
+                                            showErrorSignInAndRelaunch(getString(R.string.Error_while_updating_user_profile_information));
+                                            dismissProgressbar();
                                         }
-
-                                    }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-                                        showErrorSignInAndRelaunch(databaseError.getMessage()+"2");
-                                         dismissProgressbar();
                                     }
                                 });
-
                             }
                         }
 
                         @Override
                         public void onCancelled(DatabaseError databaseError) {
-                            showErrorSignInAndRelaunch(databaseError.getMessage()+"1");
-                           dismissProgressbar();
+                            showErrorSignInAndRelaunch(databaseError.getMessage()+" 1");
+                            dismissProgressbar();
                         }
                     });
 
 
+
+
+                }else {
+                    dismissProgressbar();
+                    Toast.makeText(this,getString(R.string.problem_while_loading_user_data),Toast.LENGTH_LONG).show();
+                    prepareFirebaseUI();
+                }
+
+
+
             }
-
-
             // Sign in canceled
             if (resultCode == RESULT_CANCELED) {
-               dismissProgressbar();
+
                 Toast.makeText(getApplicationContext()
                         ,getString(R.string.connection_to_server_cancelled)
                         ,Toast.LENGTH_SHORT).show();
-                onBackPressed();
+
+                if(!haveNetworkConnection()){
+                    noConnectionContinue();
+                }else {
+                    prepareFirebaseUI();
+                    dismissProgressbar();
+                }
                 return;
             }
 
             // No network
             if (resultCode == ResultCodes.RESULT_NO_NETWORK) {
-                dismissProgressbar();
-
+                if(!haveNetworkConnection()){
+                    noConnectionContinue();
+                }else {
+                    dismissProgressbar();
+                }
                 showErrorSignInAndRelaunch("result no network");
                 return;
             }
@@ -566,13 +515,6 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext()
                 ,message
                 ,Toast.LENGTH_SHORT).show();
-        startActivityForResult(AuthUI.getInstance().createSignInIntentBuilder()
-                .setProviders(AuthUI.EMAIL_PROVIDER,
-                        AuthUI.FACEBOOK_PROVIDER)
-                .setIsSmartLockEnabled(!BuildConfig.DEBUG)
-                .setTheme(R.style.AppTheme)
-                .build(),FB_SIGN_IN);
-
     }
 
     @Override
@@ -716,24 +658,6 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-    private void procideOffline() {
-        dismissProgressbar();
-        Toast.makeText(getApplicationContext()
-                ,getString(R.string.connection_to_server_not_aviable)
-                ,Toast.LENGTH_SHORT).show();
-        if(userSharedPreference.getLoggedInUser()!=null && userSharedPreference.getUserLocation()!=null){
-            startActivity(new Intent(MainActivity.this,CategoryActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-            finish();
-            dismissProgressbar();
-        }else {
-            startActivity(new Intent(MainActivity.this,LocationsActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-            finish();
-            dismissProgressbar();
-        }
-    }
 
 }
 

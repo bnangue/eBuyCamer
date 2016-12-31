@@ -56,6 +56,7 @@ public class SingleDealActivityActivity extends AppCompatActivity {
     private RelativeLayout overviewLayout;
     private Deals deal;
     private String[] categoriesArray;
+    private Bitmap decodedByte;
 
 
     private String dealid;
@@ -83,20 +84,31 @@ public class SingleDealActivityActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         singledeal=false;
-        if (!haveNetworkConnection()){
-            Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                    ,Toast.LENGTH_SHORT).show();
-        }
 
 
         setContentView(R.layout.activity_single_deal_activity);
         userSharedPreference=new UserSharedPreference(this);
         auth=FirebaseAuth.getInstance();
+        userSharedPreference.setUserDataRefreshed(haveNetworkConnection());
         if(auth!=null){
             user=auth.getCurrentUser();
         }else {
-            startActivity(new Intent(SingleDealActivityActivity.this,MainActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            if(userSharedPreference.getUserLoggedIn()){
+                // user offline
+                if(!userSharedPreference.getUserDataRefreshed()){
+                    // user refreshed data on start
+                }
+
+            }else {
+                // user online but auth problem
+                Toast.makeText(this,getString(R.string.problem_while_loading_user_data_auth_null),Toast.LENGTH_LONG).show();
+
+                startActivity(new Intent(this,MainActivity.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                Intent.FLAG_ACTIVITY_NEW_TASK));
+                finish();
+            }
         }
 
         currencyArray=getResources().getStringArray(R.array.currency);
@@ -110,18 +122,13 @@ public class SingleDealActivityActivity extends AppCompatActivity {
         overviewLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!haveNetworkConnection() || deal==null){
-                    Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                            ,Toast.LENGTH_SHORT).show();
-                }else {
-                    if(deal!=null){
-                        startActivity(new Intent(SingleDealActivityActivity.this,ViewContentDealActivity.class)
-                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                .putExtra("user_uid",deal.getPrivateContent().getCreatorid())
-                                .putExtra("post",deal.getPrivateContent().getUniquefirebaseId())
-                                .putExtra("location",deal.getPrivateContent().getLocation().getName())
-                                .putExtra("categorie",deal.getPrivateContent().getCategorie().getName()));
-                    }
+                if(deal!=null){
+                    startActivity(new Intent(SingleDealActivityActivity.this,ViewContentDealActivity.class)
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            .putExtra("user_uid",deal.getPrivateContent().getCreatorid())
+                            .putExtra("post",deal.getPrivateContent().getUniquefirebaseId())
+                            .putExtra("location",deal.getPrivateContent().getLocation().getName())
+                            .putExtra("categorie",deal.getPrivateContent().getCategorie().getName()));
                 }
             }
         });
@@ -153,14 +160,18 @@ public class SingleDealActivityActivity extends AppCompatActivity {
 
             DatabaseReference referenceDeal=root.child(ConfigApp.FIREBASE_APP_URL_USERS_DEAL_USER)
                     .child(user.getUid()).child(dealid);
+            referenceDeal.keepSynced(true);
             referenceDeal.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot!=null){
                         Deals d=dataSnapshot.getValue(Deals.class);
-                        deal=d;
-                        populate(d);
-                        fetchOffers(d);
+                        if(d!=null){
+                            deal=d;
+                            populate(d);
+                            fetchOffers(d);
+                        }
+
                     }else {
                         dismissProgressbar();
                     }
@@ -171,12 +182,19 @@ public class SingleDealActivityActivity extends AppCompatActivity {
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
 
+                    Toast.makeText(getApplicationContext(),databaseError.getMessage()
+                            ,Toast.LENGTH_SHORT).show();
                     dismissProgressbar();
                 }
             });
 
 
 
+        }
+
+        if (!haveNetworkConnection()){
+            dismissProgressbar();
+            Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -185,7 +203,7 @@ public class SingleDealActivityActivity extends AppCompatActivity {
         final Query reference= root.child(ConfigApp.FIREBASE_APP_URL_USERS_DEAL_USER)
                 .child(user.getUid()).child(dealid)
                 .child("offers/offers").orderByChild("time");
-      //  reference.keepSynced(true);
+       reference.keepSynced(true);
         final FirebaseRecyclerAdapter<Offer,DealSingleViewHolder> adapter=
                 new FirebaseRecyclerAdapter<Offer, DealSingleViewHolder>(
                         Offer.class,
@@ -217,12 +235,9 @@ public class SingleDealActivityActivity extends AppCompatActivity {
                             public void onClick(View view) {
                                 // start chat
 
+                                //key is the firebase uid from offer maker
                                 String key = getRef(position).getKey();
 
-                                String chat_id=FirebaseDatabase.getInstance().getReference()
-                                        .child(deal.getPrivateContent().getCreatorid())
-                                        .child(dealid)
-                                        .child(key).push().getKey();
                                 startActivity(new Intent(SingleDealActivityActivity.this,ChatActivity.class)
                                         .putExtra("key",key)
                                         .putExtra("creator_uid",deal.getPrivateContent().getCreatorid())
@@ -239,8 +254,16 @@ public class SingleDealActivityActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
 
+        if (!haveNetworkConnection()){
+            Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
+        }
         if(adapter.getItemCount()==0){
             dismissProgressbar();
+        }
+
+        if (!haveNetworkConnection()){
+            dismissProgressbar();
+            Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
         }
     }
     private void populate(final Deals model) {
@@ -250,7 +273,7 @@ public class SingleDealActivityActivity extends AppCompatActivity {
         mylocation.setText(model.getPrivateContent().getLocation().getName());
         if(model.getPrivateContent().getFirstPicture()!=null){
             byte[] decodedString = Base64.decode(model.getPrivateContent().getFirstPicture(), Base64.DEFAULT);
-            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+             decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
 
             postPicture.setImageBitmap(decodedByte);
             dismissProgressbar();
@@ -284,7 +307,7 @@ public class SingleDealActivityActivity extends AppCompatActivity {
 
 
 
-        DecimalFormat decFmt = new DecimalFormat("#,###.##", DecimalFormatSymbols.getInstance(Locale.GERMAN));
+        DecimalFormat decFmt = new DecimalFormat("#,###.##", DecimalFormatSymbols.getInstance(Locale.FRENCH));
         decFmt.setMaximumFractionDigits(2);
         decFmt.setMinimumFractionDigits(2);
 
@@ -318,17 +341,12 @@ public class SingleDealActivityActivity extends AppCompatActivity {
         return 0;
 
     }
-    private void procideOffline() {
-        //show snackbar
 
-        Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                ,Toast.LENGTH_SHORT).show();
-        dismissProgressbar();
-    }
     private void showProgressbar(){
         progressBar = new ProgressDialog(this);
         progressBar.setCancelable(false);
         progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressBar.setMessage(getString(R.string.progress_dialog_loading));
         progressBar.show();
     }
 
@@ -358,13 +376,22 @@ public class SingleDealActivityActivity extends AppCompatActivity {
         super.onPause();
         singledeal=true;
         dismissProgressbar();
+        if (decodedByte!=null){
+            decodedByte.recycle();
+        }
+
 
     }
+
 
     protected void onStop() {
         super.onStop();
         dismissProgressbar();
         singledeal=true;
+        if (decodedByte!=null){
+            decodedByte=null;
+        }
+
     }
 
 

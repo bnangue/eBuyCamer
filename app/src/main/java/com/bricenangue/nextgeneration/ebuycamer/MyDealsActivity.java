@@ -87,21 +87,29 @@ public class MyDealsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_deals);
 
-
-        if (!haveNetworkConnection()){
-            dismissProgressbar();
-            Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                    ,Toast.LENGTH_SHORT).show();
-            finish();
-        }
-
         userSharedPreference=new UserSharedPreference(this);
+
         auth=FirebaseAuth.getInstance();
+        userSharedPreference.setUserDataRefreshed(haveNetworkConnection());
         if(auth!=null){
             user=auth.getCurrentUser();
         }else {
-            startActivity(new Intent(MyDealsActivity.this,MainActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+             if(userSharedPreference.getUserLoggedIn()){
+                // user offline
+                if(!userSharedPreference.getUserDataRefreshed()){
+                    // user refreshed data on start
+                }
+
+            }else {
+                // user online but auth problem
+                Toast.makeText(this,getString(R.string.problem_while_loading_user_data_auth_null),Toast.LENGTH_LONG).show();
+
+                startActivity(new Intent(this,MainActivity.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                Intent.FLAG_ACTIVITY_NEW_TASK));
+                finish();
+            }
         }
         currencyArray=getResources().getStringArray(R.array.currency);
         categoriesArray = getResources().getStringArray(R.array.categories_array_activity);
@@ -121,19 +129,11 @@ public class MyDealsActivity extends AppCompatActivity {
 
     }
 
-
-    private void procideOffline() {
-        //show snackbar
-
-        Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                ,Toast.LENGTH_SHORT).show();
-        dismissProgressbar();
-    }
-
     private void showProgressbar(){
         progressBar = new ProgressDialog(this);
         progressBar.setCancelable(false);
         progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressBar.setMessage(getString(R.string.progress_dialog_loading));
         progressBar.show();
         lockscreen();
     }
@@ -178,18 +178,23 @@ public class MyDealsActivity extends AppCompatActivity {
     private void fetchMyDeals() {
         showProgressbar();
         final Query reference= root.child(user.getUid());
-       // reference.keepSynced(true);
-        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+        reference.keepSynced(true);
+        reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.hasChildren()){
                     dismissProgressbar();
+                    if (!haveNetworkConnection()){
+                        Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
+                        reference.removeEventListener(this);
+                    }
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                reference.removeEventListener(this);
+                Toast.makeText(getApplicationContext(),databaseError.getMessage(),Toast.LENGTH_SHORT).show();
             }
         });
         FirebaseRecyclerAdapter<Deals,MyDealViewHolder> adapter=
@@ -265,23 +270,16 @@ public class MyDealsActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(View v) {
 
-                                    if (!haveNetworkConnection()){
-                                        Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                                                ,Toast.LENGTH_SHORT).show();
-                                    }else {
-                                        startActivity(new Intent(MyDealsActivity.this,SingleDealActivityActivity.class)
-                                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                .putExtra("user_uid",model.getPrivateContent().getCreatorid())
-                                                .putExtra("dealid",model.getPrivateContent().getUniquefirebaseId()));
-
-                                        // open dealActivity
-                                    }
+                                    startActivity(new Intent(MyDealsActivity.this,SingleDealActivityActivity.class)
+                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                            .putExtra("user_uid",model.getPrivateContent().getCreatorid())
+                                            .putExtra("dealid",model.getPrivateContent().getUniquefirebaseId()));
 
 
                                 }
                             });
 
-                            DecimalFormat decFmt = new DecimalFormat("#,###.##", DecimalFormatSymbols.getInstance(Locale.GERMAN));
+                            DecimalFormat decFmt = new DecimalFormat("#,###.##", DecimalFormatSymbols.getInstance(Locale.FRENCH));
                             decFmt.setMaximumFractionDigits(2);
                             decFmt.setMinimumFractionDigits(2);
 
@@ -310,6 +308,8 @@ public class MyDealsActivity extends AppCompatActivity {
                                     if (!haveNetworkConnection()){
                                         Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
                                                 ,Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable_cannot_delete_deal)
+                                                ,Toast.LENGTH_SHORT).show();
                                     }else {
                                         showProgressbar();
                                         deleteDeal(model);
@@ -322,13 +322,7 @@ public class MyDealsActivity extends AppCompatActivity {
                             viewHolder.button_share.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    if (!haveNetworkConnection()){
-                                        Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                                                ,Toast.LENGTH_SHORT).show();
-                                    }else {
-
-                                        onInviteClicked();
-                                    }
+                                    onInviteClicked();
                                 }
                             });
 
@@ -336,14 +330,9 @@ public class MyDealsActivity extends AppCompatActivity {
                                 @Override
                                 public void onClick(View view) {
 
-                                    if (!haveNetworkConnection()){
-                                        Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                                                ,Toast.LENGTH_SHORT).show();
-                                    }else {
-                                        startActivity(new Intent(MyDealsActivity.this,CreateAndModifyDealsActivity.class)
-                                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                .putExtra("dealToedit",model.getPrivateContent().getUniquefirebaseId()));
-                                    }
+                                    startActivity(new Intent(MyDealsActivity.this,CreateAndModifyDealsActivity.class)
+                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                            .putExtra("dealToedit",model.getPrivateContent().getUniquefirebaseId()));
 
                                 }
                             });
@@ -351,17 +340,12 @@ public class MyDealsActivity extends AppCompatActivity {
                             viewHolder.button_overview.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    if (!haveNetworkConnection()){
-                                        Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                                                ,Toast.LENGTH_SHORT).show();
-                                    }else {
-                                        startActivity(new Intent(MyDealsActivity.this,ViewContentDealActivity.class)
-                                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                .putExtra("user_uid",model.getPrivateContent().getCreatorid())
-                                                .putExtra("post",model.getPrivateContent().getUniquefirebaseId())
-                                                .putExtra("location",model.getPrivateContent().getLocation().getName())
-                                                .putExtra("categorie",model.getPrivateContent().getCategorie().getName()));
-                                    }
+                                    startActivity(new Intent(MyDealsActivity.this,ViewContentDealActivity.class)
+                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                            .putExtra("user_uid",model.getPrivateContent().getCreatorid())
+                                            .putExtra("post",model.getPrivateContent().getUniquefirebaseId())
+                                            .putExtra("location",model.getPrivateContent().getLocation().getName())
+                                            .putExtra("categorie",model.getPrivateContent().getCategorie().getName()));
 
 
                                 }
@@ -381,6 +365,10 @@ public class MyDealsActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
 
+        if (!haveNetworkConnection()){
+            dismissProgressbar();
+            Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
+        }
 
     }
 

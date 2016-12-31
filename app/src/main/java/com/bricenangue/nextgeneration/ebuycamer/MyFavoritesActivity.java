@@ -84,11 +84,27 @@ public class MyFavoritesActivity extends AppCompatActivity {
 
         userSharedPreference=new UserSharedPreference(this);
         auth=FirebaseAuth.getInstance();
+        userSharedPreference.setUserDataRefreshed(haveNetworkConnection());
         if(auth!=null){
             user=auth.getCurrentUser();
         }else {
-            startActivity(new Intent(MyFavoritesActivity.this,MainActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            if(userSharedPreference.getUserLoggedIn()){
+                // user offline
+                if(!userSharedPreference.getUserDataRefreshed()){
+                    // user refreshed data on start
+
+                }
+
+            }else {
+                // user online but auth problem
+                Toast.makeText(this,getString(R.string.problem_while_loading_user_data_auth_null),Toast.LENGTH_LONG).show();
+
+                startActivity(new Intent(this,MainActivity.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                Intent.FLAG_ACTIVITY_NEW_TASK));
+                finish();
+            }
         }
         currencyArray=getResources().getStringArray(R.array.currency);
         root= FirebaseDatabase.getInstance().getReference().child(ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES);
@@ -102,24 +118,13 @@ public class MyFavoritesActivity extends AppCompatActivity {
 
         categoriesArray = getResources().getStringArray(R.array.categories_array_activity);
 
-        if (!haveNetworkConnection()){
-            Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                    ,Toast.LENGTH_SHORT).show();
-        }
     }
 
-
-    private void procideOffline() {
-        //show snackbar
-
-        Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                ,Toast.LENGTH_SHORT).show();
-        dismissProgressbar();
-    }
     private void showProgressbar(){
         progressBar = new ProgressDialog(this);
         progressBar.setCancelable(false);
         progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressBar.setMessage(getString(R.string.progress_dialog_loading));
         progressBar.show();
         lockscreen();
     }
@@ -144,20 +149,26 @@ public class MyFavoritesActivity extends AppCompatActivity {
 
         showProgressbar();
         final Query reference= root.child(user.getUid());
+        reference.keepSynced(true);
         reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.hasChildren()){
                     dismissProgressbar();
+                    if (!haveNetworkConnection()){
+                        Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
+                        reference.removeEventListener(this);
+                    }
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                reference.removeEventListener(this);
+                Toast.makeText(getApplicationContext(),databaseError.getMessage(),Toast.LENGTH_SHORT).show();
             }
         });
-       // reference.keepSynced(true);
+
         FirebaseRecyclerAdapter<Publication,MyPublicationFavViewHolder> adapter=
                 new FirebaseRecyclerAdapter<Publication, MyPublicationFavViewHolder>(
                         Publication.class,
@@ -174,14 +185,14 @@ public class MyFavoritesActivity extends AppCompatActivity {
                         }else if (position==getItemCount()-1){
                             dismissProgressbar();
                         }
-
-                        if (model.getPrivateContent().getCategorie().getCatNumber()==20){
-                            viewHolder.saleLogo.setVisibility(View.VISIBLE);
-
-                        }else {
-                            viewHolder.saleLogo.setVisibility(View.GONE);
-                        }
                         if(model.getPrivateContent()!=null && model.getPublicContent()!=null ){
+
+                            if (model.getPrivateContent().getCategorie().getCatNumber()==20){
+                                viewHolder.saleLogo.setVisibility(View.VISIBLE);
+
+                            }else {
+                                viewHolder.saleLogo.setVisibility(View.GONE);
+                            }
                             //   viewHolder.mylocation.setText(model.getLocation().getName());
                             if(model.getPrivateContent().isNegotiable()){
                                 viewHolder.isnegotiable.setText(getString(R.string.text_is_not_negotiable));
@@ -241,38 +252,31 @@ public class MyFavoritesActivity extends AppCompatActivity {
                             viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
+                                    if(model.getPrivateContent().getCategorie().getCatNumber()==20){
+                                        startActivity(new Intent(MyFavoritesActivity.this,ViewContentDealActivity.class)
+                                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                .putExtra("user_uid",model.getPrivateContent().getCreatorid())
+                                                .putExtra("FromFav",true)
+                                                .putExtra("post",model.getPrivateContent().getUniquefirebaseId())
+                                                .putExtra("location",model.getPrivateContent().getLocation().getName())
+                                                .putExtra("categorie",model.getPrivateContent().getCategorie().getName()));
 
 
-                                    if (!haveNetworkConnection()){
-                                        Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                                                ,Toast.LENGTH_SHORT).show();
                                     }else {
-                                        if(model.getPrivateContent().getCategorie().getCatNumber()==20){
-                                            startActivity(new Intent(MyFavoritesActivity.this,ViewContentDealActivity.class)
-                                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                    .putExtra("user_uid",model.getPrivateContent().getCreatorid())
-                                                    .putExtra("FromFav",true)
-                                                    .putExtra("post",model.getPrivateContent().getUniquefirebaseId())
-                                                    .putExtra("location",model.getPrivateContent().getLocation().getName())
-                                                    .putExtra("categorie",model.getPrivateContent().getCategorie().getName()));
+                                        startActivity(new Intent(MyFavoritesActivity.this,ViewContentActivity.class)
+                                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                                .putExtra("post",model.getPrivateContent().getUniquefirebaseId())
+                                                .putExtra("location",model.getPrivateContent().getLocation().getName())
+                                                .putExtra("FromFav",true)
+                                                .putExtra("categorie",model.getPrivateContent().getCategorie().getName()));
 
 
-                                        }else {
-                                            startActivity(new Intent(MyFavoritesActivity.this,ViewContentActivity.class)
-                                                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                                                    .putExtra("post",model.getPrivateContent().getUniquefirebaseId())
-                                                    .putExtra("location",model.getPrivateContent().getLocation().getName())
-                                                    .putExtra("FromFav",true)
-                                                    .putExtra("categorie",model.getPrivateContent().getCategorie().getName()));
-
-
-                                        }
                                     }
 
                                 }
                             });
 
-                            DecimalFormat decFmt = new DecimalFormat("#,###.##", DecimalFormatSymbols.getInstance(Locale.GERMAN));
+                            DecimalFormat decFmt = new DecimalFormat("#,###.##", DecimalFormatSymbols.getInstance(Locale.FRENCH));
                             decFmt.setMaximumFractionDigits(2);
                             decFmt.setMinimumFractionDigits(2);
 
@@ -307,6 +311,8 @@ public class MyFavoritesActivity extends AppCompatActivity {
                                     if (!haveNetworkConnection()){
                                         Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
                                                 ,Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable_cannot_delete_deal)
+                                                ,Toast.LENGTH_SHORT).show();
                                     }else {
                                         deletePostFromFavorite(model);
                                     }
@@ -317,13 +323,7 @@ public class MyFavoritesActivity extends AppCompatActivity {
                             viewHolder.button_share.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View view) {
-                                    if (!haveNetworkConnection()){
-                                        Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                                                ,Toast.LENGTH_SHORT).show();
-                                    }else {
-
-                                        onInviteClicked();
-                                    }
+                                    onInviteClicked();
                                 }
                             });
                         }
@@ -334,7 +334,10 @@ public class MyFavoritesActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
 
-
+        if (!haveNetworkConnection()){
+            dismissProgressbar();
+            Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
+        }
 
     }
 

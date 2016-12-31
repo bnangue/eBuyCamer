@@ -106,7 +106,6 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
     private boolean fromFav = false;
 
     private String[] currencyArray;
-    private ShareActionProvider mShareActionProvider;
     private boolean loaded = false;
     private UserPublic userPublic;
     private static final int MY_PERMISSIONS_REQUEST_PHONE_CALL=237;
@@ -118,6 +117,7 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
     private ValueEventListener valueEventListener;
     private  DatabaseReference refcreator;
     private Button button_remove_offer;
+    private ShareActionProvider mShareActionProvider;
 
     public boolean haveNetworkConnection() {
         boolean haveConnectedWifi = false;
@@ -175,10 +175,24 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
         buttonMakeoffer = (Button) findViewById(R.id.button_viewcontent_makeoffer_deal);
 
         auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() == null) {
-            startActivity(new Intent(ViewContentDealActivity.this, MainActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-            finish();
+        userSharedPreference.setUserDataRefreshed(haveNetworkConnection());
+        if (auth== null) {
+            if(userSharedPreference.getUserLoggedIn()){
+                // user offline
+                if(!userSharedPreference.getUserDataRefreshed()){
+                    // user refreshed data on start
+                }
+
+            }else {
+                // user online but auth problem
+                Toast.makeText(this,getString(R.string.problem_while_loading_user_data_auth_null),Toast.LENGTH_LONG).show();
+
+                startActivity(new Intent(this,MainActivity.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                Intent.FLAG_ACTIVITY_NEW_TASK));
+                finish();
+            }
 
         } else {
             user = auth.getCurrentUser();
@@ -206,10 +220,7 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
 
 
         }
-        if (!haveNetworkConnection()){
-            procideOffline();
-            finish();
-        }
+
         buttonMakeoffer.setOnClickListener(this);
 
 
@@ -229,6 +240,7 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
+                Toast.makeText(getApplicationContext(),databaseError.getMessage(),Toast.LENGTH_SHORT).show();
             }
         };
 
@@ -236,6 +248,8 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
 
     public void ButtonRemoveMyOfferClicked(View view){
         if (!haveNetworkConnection()){
+
+            Toast.makeText(getApplicationContext(),getString(R.string.action_not_avialable_or_offline),Toast.LENGTH_SHORT).show();
             Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
                     ,Toast.LENGTH_SHORT).show();
         }else {
@@ -246,25 +260,17 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
                     .child("offers");
 
             updateOffersListMinus(referenceOffers,publication.getPrivateContent().getUniquefirebaseId());
-
         }
 
+
     }
 
-
-
-    private void procideOffline() {
-        //show snackbar
-
-        Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                ,Toast.LENGTH_SHORT).show();
-        dismissProgressbar();
-    }
 
     private void showProgressbar(){
         progressBar = new ProgressDialog(this);
         progressBar.setCancelable(false);
         progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressBar.setMessage(getString(R.string.progress_dialog_loading));
         progressBar.show();
     }
 
@@ -294,18 +300,28 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
                     getPost();
                 } else {
                     if (fromFav) {
-                        Map<String, Object> childreen = new HashMap<>();
-                        childreen.put("/" + ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES + "/" + user.getUid()
-                                + "/" + postUniqueFbId, null);
-                        childreen.put("/" + ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES_USER + "/" + user.getUid()
-                                + "/" + postUniqueFbId, null);
+                        if (haveNetworkConnection()){
+                            Map<String, Object> childreen = new HashMap<>();
+                            childreen.put("/" + ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES + "/" + user.getUid()
+                                    + "/" + postUniqueFbId, null);
+                            childreen.put("/" + ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES_USER + "/" + user.getUid()
+                                    + "/" + postUniqueFbId, null);
 
-                        root.updateChildren(childreen);
-                        Toast.makeText(getApplicationContext(), getString(R.string.string_toast_viewcontent_Post_deleted)
-                                , Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(ViewContentDealActivity.this, MyFavoritesActivity.class)
-                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-                        finish();
+                            root.updateChildren(childreen);
+
+                            Toast.makeText(getApplicationContext(), getString(R.string.string_toast_viewcontent_Post_deleted)
+                                    , Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(ViewContentDealActivity.this, MyFavoritesActivity.class)
+                                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                            finish();
+                        }else {
+                            startActivity(new Intent(ViewContentDealActivity.this, MyFavoritesActivity.class)
+                                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                            finish();
+                        }
+
+
+
                     } else {
                         Toast.makeText(getApplicationContext(), getString(R.string.string_toast_viewcontent_Post_deleted)
                                 , Toast.LENGTH_SHORT).show();
@@ -318,11 +334,19 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+
                 dismissProgressbar();
+                Toast.makeText(getApplicationContext(),databaseError.getMessage()
+                        ,Toast.LENGTH_SHORT).show();
+                dismissProgressbar();
+                finish();
             }
         });
 
-
+        if (!haveNetworkConnection()){
+            dismissProgressbar();
+            Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void getPost() {
@@ -337,109 +361,131 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
                 DatabaseReference reference = root.child(ConfigApp.FIREBASE_APP_URL_USERS_DEAL_USER)
                         .child(user_uid)
                         .child(postUniqueFbId);
-               // reference.keepSynced(true);
-                reference.addListenerForSingleValueEvent(new ValueEventListener() {
+                reference.keepSynced(true);
+                reference.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         publication = dataSnapshot.getValue(Deals.class);
                         if(publication!=null){
                             populate(publication);
+                            if (publication.getPrivateContent().getCreatorid().equals(user.getUid())) {
+                                if (menuItem != null) {
+                                    menuItem.setEnabled(false);
+                                    menuItem.setVisible(false);
+                                    buttonMakeoffer.setVisibility(View.GONE);
 
-                        }
-                        if (publication.getPrivateContent().getCreatorid().equals(user.getUid())) {
-                            if (menuItem != null) {
-                                menuItem.setEnabled(false);
-                                menuItem.setVisible(false);
-                                buttonMakeoffer.setVisibility(View.GONE);
+                                }
 
-                            }
-
-                        } else {
+                            } else {
 
 
-                            buttonMakeoffer.setVisibility(View.VISIBLE);
-                            DatabaseReference reference1 = root.child(ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES_USER)
-                                    .child(user.getUid()).child(publication.getPrivateContent().getUniquefirebaseId());
-                            reference1.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    if (dataSnapshot.getValue() != null) {
-                                        Boolean b = dataSnapshot.getValue(boolean.class);
-                                        if (b) {
-                                            isInFavorite = b;
-                                            menuItem.setIcon(getResources().getDrawable(R.drawable.ic_star_white_36dp));
+                                buttonMakeoffer.setVisibility(View.VISIBLE);
+                                DatabaseReference reference1 = root.child(ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES_USER)
+                                        .child(user.getUid()).child(publication.getPrivateContent().getUniquefirebaseId());
+                                reference1.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        if (dataSnapshot.getValue() != null) {
+                                            Boolean b = dataSnapshot.getValue(boolean.class);
+                                            if (b) {
+                                                isInFavorite = b;
+                                                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_star_white_36dp));
+                                            }
                                         }
+
                                     }
 
-                                }
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
 
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
+                                        dismissProgressbar();
+                                    }
+                                });
+                            }
+                        }else {
+                            if (haveNetworkConnection()){
+                                // the post doesn't exist or has been deleted
+                                Toast.makeText(getApplicationContext(), getString(R.string.string_toast_viewcontent_Post_deleted)
+                                        , Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
 
-                                    dismissProgressbar();
-                                }
-                            });
                         }
+
                     }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
+                        Toast.makeText(getApplicationContext(),databaseError.getMessage()
+                                ,Toast.LENGTH_SHORT).show();
                         dismissProgressbar();
+                        finish();
                     }
                 });
             }else {
                 DatabaseReference reference = root.child(ConfigApp.FIREBASE_APP_URL_USERS_DEAL)
                         .child(postUniqueFbId);
-               // reference.keepSynced(true);
+               reference.keepSynced(true);
 
-                reference.addListenerForSingleValueEvent(new ValueEventListener() {
+                reference.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         publication = dataSnapshot.getValue(Deals.class);
                         if(publication!=null){
                             populate(publication);
 
+                            if (publication.getPrivateContent().getCreatorid().equals(user.getUid())) {
+                                if (menuItem != null) {
+                                    menuItem.setEnabled(false);
+                                    menuItem.setVisible(false);
+                                    buttonMakeoffer.setVisibility(View.GONE);
 
-                        }
-                        if (publication.getPrivateContent().getCreatorid().equals(user.getUid())) {
-                            if (menuItem != null) {
-                                menuItem.setEnabled(false);
-                                menuItem.setVisible(false);
-                                buttonMakeoffer.setVisibility(View.GONE);
+                                }
 
-                            }
-
-                        } else {
+                            } else {
 
 
-                            buttonMakeoffer.setVisibility(View.VISIBLE);
-                            DatabaseReference reference1 = root.child(ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES_USER)
-                                    .child(user.getUid()).child(publication.getPrivateContent().getUniquefirebaseId());
-                            reference1.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    if (dataSnapshot.getValue() != null) {
-                                        Boolean b = dataSnapshot.getValue(boolean.class);
-                                        if (b) {
-                                            isInFavorite = b;
-                                            menuItem.setIcon(getResources().getDrawable(R.drawable.ic_star_white_36dp));
+                                buttonMakeoffer.setVisibility(View.VISIBLE);
+                                DatabaseReference reference1 = root.child(ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES_USER)
+                                        .child(user.getUid()).child(publication.getPrivateContent().getUniquefirebaseId());
+                                reference1.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        if (dataSnapshot.getValue() != null) {
+                                            Boolean b = dataSnapshot.getValue(boolean.class);
+                                            if (b) {
+                                                isInFavorite = b;
+                                                menuItem.setIcon(getResources().getDrawable(R.drawable.ic_star_white_36dp));
+                                            }
                                         }
+
                                     }
 
-                                }
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
 
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
+                                        dismissProgressbar();
+                                    }
+                                });
+                            }
+                        }else {
+                            if (haveNetworkConnection()){
+                                // the post doesn't exist or has been deleted
+                                Toast.makeText(getApplicationContext(), getString(R.string.string_toast_viewcontent_Post_deleted)
+                                        , Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
 
-                                    dismissProgressbar();
-                                }
-                            });
                         }
+
                     }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
+                        Toast.makeText(getApplicationContext(),databaseError.getMessage()
+                                ,Toast.LENGTH_SHORT).show();
                         dismissProgressbar();
+                        finish();
                     }
                 });
             }
@@ -470,11 +516,16 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
                 if (!haveNetworkConnection()){
                     Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
                             ,Toast.LENGTH_SHORT).show();
-                }else {
+                }
                     if (isInFavorite) {
                         if (publication != null) {
                             item.setIcon(getResources().getDrawable(R.drawable.ic_star_border_white_36dp));
                             isInFavorite = false;
+
+                            if (!haveNetworkConnection()){
+                                Toast.makeText(getApplicationContext(),
+                                        getString(R.string.string_viewcontent_unmarked_as_favorite), Toast.LENGTH_SHORT).show();
+                            }
                             Map<String, Object> childreen = new HashMap<>();
                             childreen.put("/" + ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES + "/" + user.getUid()
                                     + "/" + publication.getPrivateContent().getUniquefirebaseId(), null);
@@ -499,6 +550,11 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
                         if (publication != null) {
                             item.setIcon(getResources().getDrawable(R.drawable.ic_star_white_36dp));
                             isInFavorite = true;
+                            if (!haveNetworkConnection()){
+                                Toast.makeText(getApplicationContext(),
+                                        getString(R.string.string_viewcontent_marked_as_favorite), Toast.LENGTH_SHORT).show();
+                            }
+
                             Map<String, Object> childreen = new HashMap<>();
                             childreen.put("/" + ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES + "/" + user.getUid()
                                     + "/" + publication.getPrivateContent().getUniquefirebaseId(), publication);
@@ -519,7 +575,7 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
                             dismissProgressbar();
                         }
                     }
-                }
+
 
                 return true;
 
@@ -650,6 +706,7 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
 
+                    Toast.makeText(getApplicationContext(),databaseError.getMessage(),Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -664,7 +721,7 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
         }
 
 
-        DecimalFormat decFmt = new DecimalFormat("#,###.##", DecimalFormatSymbols.getInstance(Locale.GERMAN));
+        DecimalFormat decFmt = new DecimalFormat("#,###.##", DecimalFormatSymbols.getInstance(Locale.FRENCH));
         decFmt.setMaximumFractionDigits(2);
         decFmt.setMinimumFractionDigits(2);
 
@@ -748,13 +805,13 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
         // if no picture check if facebook picture avialable
         if (!loaded && publication.getPrivateContent().getCreatorid().equals(user.getUid())) {
             String facebookUserId = "";
-            // find the Facebook profile and get the user's id
-            for (UserInfo profile : user.getProviderData()) {
-                // check if the provider id matches "facebook.com"
-                if (profile.getProviderId().equals(getString(R.string.facebook_provider_id))) {
-                    facebookUserId = profile.getUid();
-                }
+            List<? extends UserInfo> list=user.getProviderData();
+            String providerId=list.get(1).getProviderId();
+
+            if (providerId.equals(getString(R.string.facebook_provider_id))) {
+                facebookUserId = list.get(1).getUid();
             }
+
             // construct the URL to the profile picture, with a custom height
             // alternatively, use '?type=small|medium|large' instead of ?height=
             final String photoUrl = "https://graph.facebook.com/" + facebookUserId + "/picture?type=large";
@@ -804,12 +861,7 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
     @Override
     protected void onStart() {
         super.onStart();
-        if (!haveNetworkConnection()){
-            procideOffline();
-            finish();
-        }else {
-            checkifexist();
-        }
+        checkifexist();
     }
 
 
@@ -877,6 +929,8 @@ public class ViewContentDealActivity extends AppCompatActivity implements ViewPa
 
                     }else {
                         if (!haveNetworkConnection()){
+                            Toast.makeText(getApplicationContext(),getString(R.string.action_not_avialable_or_offline),Toast.LENGTH_SHORT).show();
+
                             Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
                                     ,Toast.LENGTH_SHORT).show();
                             dialog.dismiss();

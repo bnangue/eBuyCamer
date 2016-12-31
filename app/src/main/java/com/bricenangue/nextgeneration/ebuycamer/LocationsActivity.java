@@ -26,6 +26,7 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,22 +48,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class LocationsActivity extends AppCompatActivity implements View.OnClickListener {
+public class LocationsActivity extends AppCompatActivity {
 
 
 
     private RecyclerView recyclerView;
     private LinearLayoutManager layoutManager;
-    private TextView instruction;
     private Toolbar toolbar;
     private RecyclerAdapterSmallCards adapterSmallCards;
     ArrayList<String> locations_list =new ArrayList<>();
+    private ProgressBar progressBar;
 
     private FirebaseAuth auth;
     private DatabaseReference root;
 
-    private TextView textViewWelcomeUser;
-    private String userDisplayedname;
     private boolean getuserlocation=false;
     FirebaseUser user;
     private UserSharedPreference userSharedPreference;
@@ -92,16 +91,30 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
         userSharedPreference=new UserSharedPreference(this);
         recyclerView=(RecyclerView) findViewById(R.id.recyclerview_locations);
 
+        progressBar=(ProgressBar)findViewById(R.id.progress_bar_location_activity);
+        userSharedPreference.setUserDataRefreshed(haveNetworkConnection());
         auth=FirebaseAuth.getInstance();
         if (auth.getCurrentUser()==null){
 
-            startActivity(new Intent(LocationsActivity.this,MainActivity.class)
-                    .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
-                            Intent.FLAG_ACTIVITY_CLEAR_TASK |
-                            Intent.FLAG_ACTIVITY_NEW_TASK));
-            finish();
+            if(userSharedPreference.getUserLoggedIn()){
+                // user offline
+                if(!userSharedPreference.getUserDataRefreshed()){
+                    // user refreshed data on start
+
+                }
+
+            }else {
+                // user online but auth problem
+                Toast.makeText(this,getString(R.string.problem_while_loading_user_data_auth_null),Toast.LENGTH_LONG).show();
+
+                startActivity(new Intent(LocationsActivity.this,MainActivity.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                Intent.FLAG_ACTIVITY_NEW_TASK));
+                finish();
+            }
+
         }else {
-            userDisplayedname=auth.getCurrentUser().getDisplayName();
             user=auth.getCurrentUser();
 
         }
@@ -137,11 +150,43 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
             @Override
             public void onItemClick(final int position, View v) {
 
+
                subscribeCityTopic(position);
                 if (!haveNetworkConnection()){
+                    // user is off store everything in sharepreference
                     Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
                             ,Toast.LENGTH_SHORT).show();
+
+                    if(getuserlocation){
+                        // subscribeCityTopic(position);
+                        userSharedPreference.storeUserLocation(locations_list.get(position),position);
+
+                        root.child(ConfigApp.FIREBASE_APP_URL_USERS).child(auth.getCurrentUser().getUid())
+                                .child("userPublic").child("Location").setValue(new Locations(locations_list.get(position),position));
+                        setResult(RESULT_OK,new Intent()
+                                .putExtra("position_location",position)
+                                .putExtra("user_location",locations_list.get(position)));
+                        Toast.makeText(getApplicationContext(),getString(R.string.no_internet_app_not_properly_work),Toast.LENGTH_LONG).show();
+                        finish();
+
+
+                    }else {
+                        userSharedPreference.storeUserLocation(locations_list.get(position),position);
+                        root.child(ConfigApp.FIREBASE_APP_URL_USERS).child(auth.getCurrentUser().getUid())
+                                .child("userPublic").child("Location").setValue(new Locations(locations_list.get(position),position));
+                        startActivity(new Intent(LocationsActivity.this,CategoryActivity.class)
+                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+
+                        Toast.makeText(getApplicationContext(),getString(R.string.no_internet_app_not_properly_work),Toast.LENGTH_LONG).show();
+                        finish();
+
+
+                    }
+
+
                 }else {
+                    progressBar.setVisibility(View.VISIBLE);
+
                     if(getuserlocation){
                        // subscribeCityTopic(position);
                         userSharedPreference.storeUserLocation(locations_list.get(position),position);
@@ -155,7 +200,7 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
                                                 .putExtra("position_location",position)
                                                 .putExtra("user_location",locations_list.get(position)));
 
-
+                                        progressBar.setVisibility(View.GONE);
                                         finish();
                                     }
                                 });
@@ -168,11 +213,11 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
                                     @Override
                                     public void onComplete(@NonNull Task<Void> task) {
 
+                                        progressBar.setVisibility(View.GONE);
                                     }
                                 });
                         startActivity(new Intent(LocationsActivity.this,CategoryActivity.class)
-                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                                .putExtra("locationName",locations_list.get(position)));
+                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
 
                         finish();
                     }
@@ -202,12 +247,6 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
     @Override
     protected void onStart() {
         super.onStart();
-    }
-
-
-    @Override
-    public void onClick(View view) {
-
     }
 
 
@@ -248,6 +287,11 @@ public class LocationsActivity extends AppCompatActivity implements View.OnClick
     }
 
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        progressBar.setVisibility(View.GONE);
+    }
 
     private void loggout() {
 

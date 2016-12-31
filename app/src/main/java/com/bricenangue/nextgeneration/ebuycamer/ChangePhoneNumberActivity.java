@@ -1,6 +1,7 @@
 package com.bricenangue.nextgeneration.ebuycamer;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -62,10 +63,27 @@ public class ChangePhoneNumberActivity extends AppCompatActivity {
 
         userSharedPreference=new UserSharedPreference(this);
         auth=FirebaseAuth.getInstance();
+        userSharedPreference.setUserDataRefreshed(haveNetworkConnection());
         if(auth!=null){
             user=auth.getCurrentUser();
         }else {
-            finish();
+            if(userSharedPreference.getUserLoggedIn()){
+                // user offline
+                if(!userSharedPreference.getUserDataRefreshed()){
+                    // user refreshed data on start
+                }
+
+            }else {
+                // user online but auth problem
+                Toast.makeText(this,getString(R.string.problem_while_loading_user_data_auth_null),Toast.LENGTH_LONG).show();
+
+                startActivity(new Intent(ChangePhoneNumberActivity.this,MainActivity.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                Intent.FLAG_ACTIVITY_NEW_TASK));
+                finish();
+            }
+
         }
         editTextCode=(EditText)findViewById(R.id.editText_userprofile_country_code_change_activity);
         editTextPhoneNumber=(EditText)findViewById(R.id.editText_userprofile_phone_number_change_activity);
@@ -88,35 +106,7 @@ public class ChangePhoneNumberActivity extends AppCompatActivity {
                         editTextPhoneNumber.requestFocus();
                         editTextPhoneNumber.performClick();
                     }else {
-                        DatabaseReference ref= FirebaseDatabase.getInstance().getReference()
-                                .child(ConfigApp.FIREBASE_APP_URL_USERS)
-                                .child(user.getUid())
-                                .child("userPublic")
-                                .child("phoneNumber");
-
-                        ref.setValue(new PhoneNumber(code,phonenumber)).addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-
-                                DatabaseReference ref= FirebaseDatabase.getInstance().getReference()
-                                        .child(ConfigApp.FIREBASE_APP_URL_USERS)
-                                        .child(user.getUid())
-                                        .child("userPublic");
-                                ref.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        userSharedPreference.storeUserData(dataSnapshot.getValue(UserPublic.class));
-                                        finish();
-                                    }
-
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-
-                                    }
-                                });
-
-                            }
-                        });
+                        savePhoneNumber(code,phonenumber);
                     }
                 }else {
                     Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
@@ -127,6 +117,57 @@ public class ChangePhoneNumberActivity extends AppCompatActivity {
         });
 
     }
+
+
+    private void savePhoneNumber(String code,String phonenumber){
+        if(!haveNetworkConnection()){
+            // user offline
+
+            userSharedPreference.setUserPhone(new PhoneNumber(code,phonenumber));
+
+            DatabaseReference ref= FirebaseDatabase.getInstance().getReference()
+                    .child(ConfigApp.FIREBASE_APP_URL_USERS)
+                    .child(user.getUid())
+                    .child("userPublic")
+                    .child("phoneNumber");
+
+            ref.setValue(new PhoneNumber(code,phonenumber));
+            finish();
+            Toast.makeText(getApplicationContext(),getString(R.string.change_have_been_made_localy),Toast.LENGTH_SHORT).show();
+        }else {
+            DatabaseReference ref= FirebaseDatabase.getInstance().getReference()
+                    .child(ConfigApp.FIREBASE_APP_URL_USERS)
+                    .child(user.getUid())
+                    .child("userPublic")
+                    .child("phoneNumber");
+
+            ref.setValue(new PhoneNumber(code,phonenumber)).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+
+                    DatabaseReference ref= FirebaseDatabase.getInstance().getReference()
+                            .child(ConfigApp.FIREBASE_APP_URL_USERS)
+                            .child(user.getUid())
+                            .child("userPublic");
+                    ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            userSharedPreference.storeUserData(dataSnapshot.getValue(UserPublic.class));
+                            finish();
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
+                }
+            });
+        }
+
+    }
+
 
     protected void sendSMSMessage() {
 

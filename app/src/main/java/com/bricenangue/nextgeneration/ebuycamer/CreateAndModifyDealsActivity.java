@@ -126,11 +126,26 @@ public class CreateAndModifyDealsActivity extends AppCompatActivity {
         categoriesArray=getResources().getStringArray(R.array.categories_arrays_create);
 
         userSharedPreference=new UserSharedPreference(this);
+        userSharedPreference.setUserDataRefreshed(haveNetworkConnection());
         auth=FirebaseAuth.getInstance();
-        if(auth.getCurrentUser()==null){
-            startActivity(new Intent(CreateAndModifyDealsActivity.this
-                    ,MainActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+        if(auth==null){
+            if(userSharedPreference.getUserLoggedIn()){
+                // user offline
+                if(!userSharedPreference.getUserDataRefreshed()){
+                    // user refreshed data on start
+                }
+
+            }else {
+                // user online but auth problem
+                Toast.makeText(this,getString(R.string.problem_while_loading_user_data_auth_null),Toast.LENGTH_LONG).show();
+
+                startActivity(new Intent(this,MainActivity.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                Intent.FLAG_ACTIVITY_NEW_TASK));
+                finish();
+            }
+
         }
 
         //to save the path in one language (english)
@@ -164,16 +179,10 @@ public class CreateAndModifyDealsActivity extends AppCompatActivity {
             }
         });
 
-
-
-        if (!haveNetworkConnection()){
-            Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                    ,Toast.LENGTH_SHORT).show();
-        }else {
-            if(dealToeditId!=null && !dealToeditId.isEmpty()){
-                populate();
-            }
+        if(dealToeditId!=null && !dealToeditId.isEmpty()){
+            populate();
         }
+
     }
 
     private void populate() {
@@ -184,48 +193,60 @@ public class CreateAndModifyDealsActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Deals deal = dataSnapshot.getValue(Deals.class);
-                PrivateContent post=deal.getPrivateContent();
-                CategoriesDeal cat=deal.getCategoriesDeal();
-                if(dataSnapshot.hasChild("description")){
-                    editTextDescription.setText(post.getDescription());
-                }
+                if (deal!=null){
+                    PrivateContent post=deal.getPrivateContent();
+                    CategoriesDeal cat=deal.getCategoriesDeal();
+                    if(dataSnapshot.hasChild("description")){
+                        editTextDescription.setText(post.getDescription());
+                    }
 
-                editTextPrice.setText(post.getPrice());
-                editTextTitle.setText(post.getTitle());
+                    editTextPrice.setText(post.getPrice());
+                    editTextTitle.setText(post.getTitle());
 
-                if(post.getPublictionPhotos()!=null){
-                    for(PublicationPhotos uri : post.getPublictionPhotos()){
-                        recyclerViewAdapter.addUri(Uri.parse(uri.getUri()));
-                        //uris.add(Uri.parse(uri.getUri()));
-                        //towWaysViewAdapter.notifyDataSetChanged();
-                        if (recyclerViewAdapter!=null && recyclerViewAdapter.getItemCount()>=5){
-                            imageViewAddNewImage.setEnabled(false);
+                    if(post.getPublictionPhotos()!=null){
+                        for(PublicationPhotos uri : post.getPublictionPhotos()){
+                            recyclerViewAdapter.addUri(Uri.parse(uri.getUri()));
+                            //uris.add(Uri.parse(uri.getUri()));
+                            //towWaysViewAdapter.notifyDataSetChanged();
+                            if (recyclerViewAdapter!=null && recyclerViewAdapter.getItemCount()>=5){
+                                imageViewAddNewImage.setEnabled(false);
 
-                        }else {
-                            imageViewAddNewImage.setEnabled(true);
+                            }else {
+                                imageViewAddNewImage.setEnabled(true);
+                            }
+
                         }
+                    }
 
+                    int positionSpinner=cat.getCatNumber();
+
+                    categoryFromPost=categoriesArray[cat.getCatNumber()];
+
+                    spinnerCategory.setSelection(positionSpinner+1);
+
+                    spinnerCategory.setEnabled(false);
+
+
+                    spinnerCurrency.setSelection(getCurrencyPosition(post.getCurrency()));
+                    spinnerCurrency.setEnabled(false);
+                    postToedit=post;
+                }else {
+                    if (!haveNetworkConnection()){
+
+                        Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
+                        finish();
+                    }else {
+                        Toast.makeText(getApplicationContext(), getString(R.string.string_toast_viewcontent_Post_deleted)
+                                , Toast.LENGTH_SHORT).show();
+                        finish();
                     }
                 }
-
-                int positionSpinner=cat.getCatNumber();
-
-                categoryFromPost=categoriesArray[cat.getCatNumber()];
-
-                spinnerCategory.setSelection(positionSpinner+1);
-
-                spinnerCategory.setEnabled(false);
-
-
-                spinnerCurrency.setSelection(getCurrencyPosition(post.getCurrency()));
-                spinnerCurrency.setEnabled(false);
-                postToedit=post;
-
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Toast.makeText(getApplicationContext(), databaseError.getMessage()
+                        , Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -243,12 +264,7 @@ public class CreateAndModifyDealsActivity extends AppCompatActivity {
 
             @Override
             public void ondelteCLick(int position) {
-                if (!haveNetworkConnection()){
-                    Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                            ,Toast.LENGTH_SHORT).show();
-                }else {
-                    delete(position);
-                }
+                delete(position);
 
             }
         });
@@ -954,25 +970,16 @@ public class CreateAndModifyDealsActivity extends AppCompatActivity {
     {
 
         String  message;
-        String  topic;
 
         SendNotification(String message)
         {
-            this.topic=topic;
             this.message=message;
         }
         @Override
         protected void onPostExecute(Void reponse) {
             super.onPostExecute(reponse);
-            suscribe();
-        }
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            unsuscribe();
         }
-
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -1023,14 +1030,6 @@ public class CreateAndModifyDealsActivity extends AppCompatActivity {
             }
             return null;
         }
-    }
-    private void suscribe(){
-        FirebaseMessaging.getInstance().subscribeToTopic(getString(R.string.fcm_notification_city)
-                +String.valueOf(userSharedPreference.getUserLocation().getNumberLocation()));
-    }
-    private void unsuscribe(){
-        FirebaseMessaging.getInstance().unsubscribeFromTopic(getString(R.string.fcm_notification_city)
-                +String.valueOf(userSharedPreference.getUserLocation().getNumberLocation()));
     }
 
 }

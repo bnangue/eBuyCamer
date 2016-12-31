@@ -19,7 +19,7 @@ public class APP extends Application {
         super.onCreate();
         Firebase.setAndroidContext(this);
         FacebookSdk.sdkInitialize(this);
-      //  FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
 
         //register for app notification topic to receive updates about app
         FirebaseMessaging.getInstance().subscribeToTopic("com.bricenangue.nextgeneration.ebuycamer");

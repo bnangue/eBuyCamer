@@ -379,6 +379,18 @@
     <string name="invitation_deep_link" translatable="false">https://zfcs5.app.goo.gl/H3Ed</string>
     <string name="invitation_cta">Click here</string>
     <string name="check_box_create_post_hint_is_for_free">For free</string>
+    <string name="problem_while_loading_user_data">A problem occured while loading your data. Please Make sure you have a stable internet connection then try to log in again</string>
+    <string name="problem_while_loading_user_data_auth_null">You signed out from your last session or did not signed up yet.</string>
+    <string name="problem_while_loading_user_data_not_identify">You haven\'t been identify. Please contact our support team</string>
+    <string name="problem_while_loading_user_data_verifaction_email_resent">We send you a link to verify your email at</string>
+    <string name="Error_while_updating_user_profile_information">Error while updating user profile information</string>
+    <string name="no_internet_app_not_properly_work">Some functions might not work properly</string>
+    <string name="toast_category_activity_update_location">Update your location to optimize your experience</string>
+    <string name="toast_category_activity_update_phone">Add a phone number to help other user easily contact you</string>
+    <string name="change_have_been_made_localy">Local data change. Update will be made as soon as a connection internet is detected</string>
+    <string name="action_not_avialable_or_offline">This action is currently not avialable. Refresh the page or try again later</string>
+    <string name="connection_to_server_not_aviable_cannot_delete_deal">You cannot delete this item</string>
+    <string name="new_conversation_a">New Conversation</string>
 
 
 </resources>

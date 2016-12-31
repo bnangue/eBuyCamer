@@ -88,9 +88,27 @@ public class MyFireBaseMessagingService extends FirebaseMessagingService {
 
 
             if(title.contains("New chat message")){
-                if(ChatActivity.messageshowed ){
+                if(ChatActivity.chatpartner_uid==null && ChatActivity.messageshowed ){
+                    sendChatNotification(maps);
+                }else if (ChatActivity.chatpartner_uid!=null && ChatActivity.creator_uid_not!=null && !ChatActivity.messageshowed && ChatActivity.post_id_not!=null){
+                    if (user.getUid().equals(maps.get("creator_uid"))
+                            && !ChatActivity.chatpartner_uid.equals(maps.get("foreign_uid"))){
+                        sendChatNotification(maps);
+                    }else if (user.getUid().equals(maps.get("foreign_uid")) && !ChatActivity.creator_uid_not.equals(maps.get("creator_uid"))){
+                        sendChatNotification(maps);
+
+                    } else if (!ChatActivity.post_id_not.equals(maps.get("post_id")) && !user.getUid().equals(maps.get("creator_uid"))
+                            && ChatActivity.chatpartner_uid.equals(maps.get("foreign_uid"))){
+                        sendChatNotification(maps);
+
+                    }else if (!ChatActivity.post_id_not.equals(maps.get("post_id")) && !user.getUid().equals(maps.get("foreign_uid"))
+                            && ChatActivity.creator_uid_not.equals(maps.get("creator_uid"))){
+                        sendChatNotification(maps);
+                    }
+                }else {
                     sendChatNotification(maps);
                 }
+
 
             }else if (title.contains("New Publication")){
                 if(maps.get("sender_uid")!=null && !maps.get("sender_uid").equals(user.getUid())){
@@ -110,7 +128,7 @@ public class MyFireBaseMessagingService extends FirebaseMessagingService {
 
             }
         }else {
-            sendNotification(maps);
+          sendNotification(maps);
 
         }
 
@@ -184,6 +202,7 @@ public class MyFireBaseMessagingService extends FirebaseMessagingService {
         String creator_uid=map.get("creator_uid");
         String post_id=map.get("post_id");
         String is_deal=map.get("is_deal");
+        String sender_uid=map.get("sender_uid");
 
         String message=sender+": " +msg;
 
@@ -208,7 +227,7 @@ public class MyFireBaseMessagingService extends FirebaseMessagingService {
         intent.putExtra("creator_uid",creator_uid);
         intent.putExtra("is_deal",is_deal);
 
-        createMychat(creator_uid,post_id,senderuid,msg,System.currentTimeMillis(),sender);
+        createMychat(creator_uid,post_id,senderuid,msg,System.currentTimeMillis(),sender,reciever,is_deal,sender_uid);
 
         Intent backIntent = new Intent(getApplicationContext(), MainPageActivity.class);
         backIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -241,9 +260,7 @@ public class MyFireBaseMessagingService extends FirebaseMessagingService {
             builder.setContentIntent(pendingIntent);
             mNotificationManager.cancelAll();
             mNotificationManager.notify(notificationId, builder.build());
-            if(!ChatActivity.messageshowed){
-                mNotificationManager.cancelAll();
-            }
+
         }
 
 
@@ -445,8 +462,9 @@ public class MyFireBaseMessagingService extends FirebaseMessagingService {
 
     }
 
-    private void createMychat(final String creator_uid, String post_id, String foreign_uid
-            , final String last_message, final long time, final String namebyuer){
+    private void createMychat(final String creator_uid, final String post_id, final String foreign_uid
+            , final String last_message, final long time, final String namebyuer, final String namecreator
+            , final String is_deal,final String sender_uid){
         //to save chat load keys
         final DatabaseReference reference= FirebaseDatabase.getInstance().getReference()
                 .child(ConfigApp.FIREBASE_APP_URL_MY_CHAT)
@@ -463,22 +481,39 @@ public class MyFireBaseMessagingService extends FirebaseMessagingService {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.hasChildren()){
-                    DataSnapshot snapshot =dataSnapshot.getChildren().iterator().next();
+                    final DataSnapshot snapshot =dataSnapshot.getChildren().iterator().next();
                     Map<String,Object> map=new HashMap<String, Object>();
                     map.put("lastmessage",last_message);
                     map.put("lastmessage_timestamp",time);
                     map.put("buyer_name",namebyuer);
+
+                    map.put("path_creator_uid",creator_uid);
+                    map.put("path_post_id",post_id);
+                    map.put("path_buyer",foreign_uid);
+
+                    map.put("buyer_name",namebyuer);
+                    map.put("creator_name",namecreator);
+                    map.put("is_deal",is_deal);
+
                     ref.child(snapshot.getKey()).updateChildren(map);
-                }else {
-                    String key_temp=ref.push().getKey();
 
+                }else {
+                    String key=reference.push().getKey();
                     Map<String,Object> map=new HashMap<String, Object>();
                     map.put("lastmessage",last_message);
                     map.put("lastmessage_timestamp",time);
                     map.put("buyer_name",namebyuer);
 
-                    ref.child(key_temp).updateChildren(map);
-                    reference.child(key_temp).setValue(key_temp);
+                    map.put("path_creator_uid",creator_uid);
+                    map.put("path_post_id",post_id);
+                    map.put("path_buyer",foreign_uid);
+
+                    map.put("buyer_name",namebyuer);
+                    map.put("creator_name",namecreator);
+                    map.put("is_deal",is_deal);
+
+                    ref.child(key).updateChildren(map);
+                    reference.child(key).setValue(key);
                 }
             }
 

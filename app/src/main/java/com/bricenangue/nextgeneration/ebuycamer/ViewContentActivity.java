@@ -63,7 +63,6 @@ import java.util.Objects;
 public class ViewContentActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener, View.OnClickListener {
 
     private Publication publication;
-    private PublicationPhotos publicationPhotos;
     private FirebaseAuth auth;
     private DatabaseReference root;
     private String postUniqueFbId;
@@ -85,22 +84,21 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
     private String postCategorie;
     private ArrayList<PublicationPhotos> arrayList = new ArrayList<>();
     private CircularImageView imageView_userPhoto;
-    private DatabaseReference referenceFavorites;
     private boolean isInFavorite;
 
     private MenuItem menuItem;
     private boolean fromFav = false;
     private String location;
-    private int position;
 
     private String[] categoriesArray;
     private String[] currencyArray;
-    private ShareActionProvider mShareActionProvider;
     private boolean loaded = false;
     private UserPublic userPublic;
     private static final int MY_PERMISSIONS_REQUEST_PHONE_CALL=237;
     private static final int REQUEST_ID_MULTIPLE_PERMISSIONS=1;
-    private  static final int REQUEST_INVITE=237 ;
+    private  static final int REQUEST_INVITE=2371 ;
+    private ShareActionProvider mShareActionProvider;
+
 
 
     public boolean haveNetworkConnection() {
@@ -128,9 +126,10 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
 
         super.onCreate(savedInstanceState);
 
-
         userSharedPreference = new UserSharedPreference(this);
+
         setContentView(R.layout.activity_view_content);
+
         intro_images = (ViewPager) findViewById(R.id.pager_introduction);
         pager_indicator = (LinearLayout) findViewById(R.id.viewPagerCountDots);
         toolbar = (Toolbar) findViewById(R.id.toolbar_view_content);
@@ -156,10 +155,26 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
         buttonSendMail = (Button) findViewById(R.id.button_viewcontent_sendmail);
 
         auth = FirebaseAuth.getInstance();
-        if (auth.getCurrentUser() == null) {
-            startActivity(new Intent(ViewContentActivity.this, MainActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-            finish();
+        userSharedPreference.setUserDataRefreshed(haveNetworkConnection());
+        if (auth == null) {
+            if(userSharedPreference.getUserLoggedIn()){
+                // user offline
+                if(!userSharedPreference.getUserDataRefreshed()){
+                    // user refreshed data on start
+
+                }
+
+            }else {
+                // user online but auth problem
+                Toast.makeText(this,getString(R.string.problem_while_loading_user_data_auth_null),Toast.LENGTH_LONG).show();
+
+                startActivity(new Intent(ViewContentActivity.this,MainActivity.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                Intent.FLAG_ACTIVITY_NEW_TASK));
+                finish();
+            }
+
 
         } else {
             user = auth.getCurrentUser();
@@ -170,49 +185,29 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
 
 
         root = FirebaseDatabase.getInstance().getReference();
-        referenceFavorites = root.child(ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES).child(user.getUid());
+
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             postUniqueFbId = extras.getString("post");
             postCategorie = extras.getString("categorie");
             location = extras.getString("location");
+
             if (extras.containsKey("FromFav")) {
                 fromFav = extras.getBoolean("FromFav");
             }
-            if (extras.containsKey("position")) {
-                position = extras.getInt("position");
-            }
-        }
-        if (savedInstanceState == null) {
 
-
-        }
-        if (!haveNetworkConnection()){
-            procideOffline();
-            finish();
         }
         buttonSendMail.setOnClickListener(this);
         buttonCall.setOnClickListener(this);
 
 
-        if (!haveNetworkConnection()){
-            procideOffline();
-        }
-
-    }
-
-    private void procideOffline() {
-        //show snackbar
-
-        Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                ,Toast.LENGTH_SHORT).show();
-        dismissProgressbar();
     }
 
     private void showProgressbar(){
         progressBar = new ProgressDialog(this);
         progressBar.setCancelable(false);
         progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressBar.setMessage(getString(R.string.progress_dialog_loading));
         progressBar.show();
     }
 
@@ -233,33 +228,42 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
         arrayList.clear();
         showProgressbar();
 
-        DatabaseReference reffav = root.child(ConfigApp.FIREBASE_APP_URL_POSTS_EXIST);
-        reffav.addListenerForSingleValueEvent(new ValueEventListener() {
+
+        final DatabaseReference reffav = root.child(ConfigApp.FIREBASE_APP_URL_POSTS_EXIST);
+        reffav.keepSynced(true);
+        reffav.addValueEventListener(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.hasChild(postUniqueFbId)) {
                     getPost();
+                    reffav.removeEventListener(this);
                 } else {
                     if (fromFav) {
-                        Map<String, Object> childreen = new HashMap<>();
-                        childreen.put("/" + ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES + "/" + user.getUid()
-                                + "/" + postUniqueFbId, null);
-                        childreen.put("/" + ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES_USER + "/" + user.getUid()
-                                + "/" + postUniqueFbId, null);
+                        if (haveNetworkConnection()){
+                            Map<String, Object> childreen = new HashMap<>();
+                            childreen.put("/" + ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES + "/" + user.getUid()
+                                    + "/" + postUniqueFbId, null);
+                            childreen.put("/" + ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES_USER + "/" + user.getUid()
+                                    + "/" + postUniqueFbId, null);
 
-                        root.updateChildren(childreen);
-                        Toast.makeText(getApplicationContext(), getString(R.string.string_toast_viewcontent_Post_deleted)
-                                , Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(ViewContentActivity.this, MyFavoritesActivity.class)
-                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-                        finish();
+                            root.updateChildren(childreen);
+                            Toast.makeText(getApplicationContext(), getString(R.string.string_toast_viewcontent_Post_deleted)
+                                    , Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(ViewContentActivity.this, MyFavoritesActivity.class)
+                                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                            finish();
+                        }else {
+                            startActivity(new Intent(ViewContentActivity.this, MyFavoritesActivity.class)
+                                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                            finish();
+                        }
+
                     } else {
                         Toast.makeText(getApplicationContext(), getString(R.string.string_toast_viewcontent_Post_deleted)
                                 , Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(ViewContentActivity.this, MainPageActivity.class)
-                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                                .putExtra("locationName", location).putExtra("category", postCategorie));
+                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
                         finish();
                     }
                 }
@@ -267,64 +271,90 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+
+                Toast.makeText(getApplicationContext(),databaseError.getMessage()
+                        ,Toast.LENGTH_SHORT).show();
                 dismissProgressbar();
+                finish();
             }
         });
-
+        if (!haveNetworkConnection()){
+            dismissProgressbar();
+            Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
+        }
 
     }
 
     private void getPost() {
 
         if (postUniqueFbId != null) {
-            DatabaseReference reference = root.child(ConfigApp.FIREBASE_APP_URL_REGIONS).child(location).child(postCategorie)
+            final DatabaseReference reference = root.child(ConfigApp.FIREBASE_APP_URL_REGIONS).child(location).child(postCategorie)
                     .child(postUniqueFbId);
-            reference.addListenerForSingleValueEvent(new ValueEventListener() {
+            reference.keepSynced(true);
+            reference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     publication = dataSnapshot.getValue(Publication.class);
-                    populate(publication);
-                    if (publication.getPrivateContent().getCreatorid().equals(user.getUid())) {
-                        if (menuItem != null) {
-                            menuItem.setEnabled(false);
-                            menuItem.setVisible(false);
-                            buttonSendMail.setVisibility(View.GONE);
-                            buttonCall.setVisibility(View.GONE);
+                    if (publication!=null){
+                        populate(publication);
 
-                        }
+                        if (publication.getPrivateContent().getCreatorid().equals(user.getUid())) {
+                            if (menuItem != null) {
+                                menuItem.setEnabled(false);
+                                menuItem.setVisible(false);
+                                buttonSendMail.setVisibility(View.GONE);
+                                buttonCall.setVisibility(View.GONE);
 
-                    } else {
+                            }
+
+                        } else {
 
 
-                        buttonSendMail.setVisibility(View.VISIBLE);
-                        buttonCall.setVisibility(View.VISIBLE);
-                        DatabaseReference reference1 = root.child(ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES_USER)
-                                .child(user.getUid()).child(publication.getPrivateContent().getUniquefirebaseId());
-                        reference1.addListenerForSingleValueEvent(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                if (dataSnapshot.getValue() != null) {
-                                    Boolean b = dataSnapshot.getValue(boolean.class);
-                                    if (b) {
-                                        isInFavorite = b;
-                                        menuItem.setIcon(getResources().getDrawable(R.drawable.ic_star_white_36dp));
+                            buttonSendMail.setVisibility(View.VISIBLE);
+                            buttonCall.setVisibility(View.VISIBLE);
+                            DatabaseReference reference1 = root.child(ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES_USER)
+                                    .child(user.getUid()).child(publication.getPrivateContent().getUniquefirebaseId());
+                            reference1.keepSynced(true);
+                            reference1.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    if (dataSnapshot.getValue() != null) {
+                                        Boolean b = dataSnapshot.getValue(boolean.class);
+                                        if (b) {
+                                            isInFavorite = true;
+                                            menuItem.setIcon(getResources().getDrawable(R.drawable.ic_star_white_36dp));
+                                        }
                                     }
+
                                 }
 
-                            }
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
 
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                                dismissProgressbar();
-                            }
-                        });
+                                    Toast.makeText(getApplicationContext(),databaseError.getMessage()
+                                            ,Toast.LENGTH_SHORT).show();
+                                    dismissProgressbar();
+                                    finish();
+                                }
+                            });
+                        }
+                    }else {
+                        if (haveNetworkConnection()){
+                            // the post doesn't exist or has been deleted
+                            Toast.makeText(getApplicationContext(), getString(R.string.string_toast_viewcontent_Post_deleted)
+                                    , Toast.LENGTH_SHORT).show();
+                            finish();
+                        }
                     }
+
                 }
 
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
+                    Toast.makeText(getApplicationContext(),databaseError.getMessage()
+                            ,Toast.LENGTH_SHORT).show();
                     dismissProgressbar();
+                    finish();
                 }
             });
         }
@@ -339,6 +369,7 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
         MenuItem item = menu.findItem(R.id.action_share_viewcontent);
         mShareActionProvider = (ShareActionProvider) MenuItemCompat.getActionProvider(menuItem);
 
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -349,13 +380,18 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
             case R.id.action_mark_as_favorite_viewcontent:
 
                 if (!haveNetworkConnection()){
-                    Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                            ,Toast.LENGTH_SHORT).show();
-                }else {
+                    Toast.makeText(getApplicationContext(),getString(R.string.change_have_been_made_localy),Toast.LENGTH_SHORT).show();
+
+                }
                     if (isInFavorite) {
                         if (publication != null) {
                             item.setIcon(getResources().getDrawable(R.drawable.ic_star_border_white_36dp));
                             isInFavorite = false;
+
+                            if (!haveNetworkConnection()){
+                                Toast.makeText(getApplicationContext(),
+                                        getString(R.string.string_viewcontent_unmarked_as_favorite), Toast.LENGTH_SHORT).show();
+                            }
                             Map<String, Object> childreen = new HashMap<>();
                             childreen.put("/" + ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES + "/" + user.getUid()
                                     + "/" + publication.getPrivateContent().getUniquefirebaseId(), null);
@@ -380,6 +416,11 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
                         if (publication != null) {
                             item.setIcon(getResources().getDrawable(R.drawable.ic_star_white_36dp));
                             isInFavorite = true;
+                            if (!haveNetworkConnection()){
+                                Toast.makeText(getApplicationContext(),
+                                        getString(R.string.string_viewcontent_marked_as_favorite), Toast.LENGTH_SHORT).show();
+                            }
+
                             Map<String, Object> childreen = new HashMap<>();
                             childreen.put("/" + ConfigApp.FIREBASE_APP_URL_USERS_FAVORITES + "/" + user.getUid()
                                     + "/" + publication.getPrivateContent().getUniquefirebaseId(), publication);
@@ -397,10 +438,10 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
                             });
                         } else {
                             Toast.makeText(getApplicationContext(), getString(R.string.string_viewcontent_error_post_null), Toast.LENGTH_SHORT).show();
-                            dismissProgressbar();
+                            finish();
                         }
                     }
-                }
+
 
 
                 return true;
@@ -466,7 +507,7 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
 
     }
 
-    private void populate(Publication publication) {
+    private void populate(final Publication publication) {
 
         textView_title.setText(publication.getPrivateContent().getTitle());
         textView_category.setText(categoriesArray[publication.getPrivateContent().getCategorie().getCatNumber() + 1]);
@@ -481,7 +522,7 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
         }else {
             textViewIsnegotiable.setText("");
         }
-        DecimalFormat decFmt = new DecimalFormat("#,###.##", DecimalFormatSymbols.getInstance(Locale.GERMAN));
+        DecimalFormat decFmt = new DecimalFormat("#,###.##", DecimalFormatSymbols.getInstance(Locale.FRENCH));
         decFmt.setMaximumFractionDigits(2);
         decFmt.setMinimumFractionDigits(2);
 
@@ -522,37 +563,61 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
         refuser.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
                 userPublic = dataSnapshot.getValue(UserPublic.class);
-                if (dataSnapshot.hasChild("name") && !dataSnapshot.child("name").getValue(String.class).isEmpty()) {
+                if(userPublic!=null){
+                    if (dataSnapshot.hasChild("name") && !dataSnapshot.child("name").getValue(String.class).isEmpty()) {
 
-                    textView_username.setText(dataSnapshot.child("name").getValue(String.class));
+                        textView_username.setText(dataSnapshot.child("name").getValue(String.class));
 
-                } else if ((dataSnapshot.hasChild("name") && (dataSnapshot.child("name").getValue(String.class).isEmpty()
-                        && dataSnapshot.hasChild("email")))
-                        || (!dataSnapshot.hasChild("name") && dataSnapshot.hasChild("email"))) {
+                    } else if ((dataSnapshot.hasChild("name") && (dataSnapshot.child("name").getValue(String.class).isEmpty()
+                            && dataSnapshot.hasChild("email")))
+                            || (!dataSnapshot.hasChild("name") && dataSnapshot.hasChild("email"))) {
 
-                    textView_username.setText(dataSnapshot.child("email").getValue(String.class));
-                }
-
-                if (dataSnapshot.hasChild("numberOfAds")) {
-                    if (dataSnapshot.child("numberOfAds").getValue() != null) {
-                        String ads = String.valueOf(dataSnapshot.child("numberOfAds").getValue(long.class))
-                                + " " + getString(R.string.viewcontent_user_numberof_Ads);
-                        textView_user_numberofAds.setText(ads);
-                    } else {
-                        String ads = "0 " + getString(R.string.viewcontent_user_numberof_Ads);
-                        textView_user_numberofAds.setText(ads);
+                        textView_username.setText(dataSnapshot.child("email").getValue(String.class));
                     }
+
+                    if(userPublic.getPhoneNumber()!=null){
+                        if(!userPublic.getUniquefirebasebId().equals(publication.getPrivateContent().getCreatorid())){
+                            buttonCall.setEnabled(true);
+                        }
+                    }else {
+                        buttonCall.setEnabled(false);
+                    }
+
+                    if (userPublic.getChatId()!=null) {
+                        if(!userPublic.getUniquefirebasebId().equals(publication.getPrivateContent().getCreatorid())){
+                            buttonSendMail.setEnabled(true);
+                        }
+                    }else {
+                        buttonSendMail.setEnabled(false);
+                    }
+
+
+                    if (dataSnapshot.hasChild("numberOfAds")) {
+                        if (dataSnapshot.child("numberOfAds").getValue() != null) {
+                            String ads = String.valueOf(dataSnapshot.child("numberOfAds").getValue(long.class))
+                                    + " " + getString(R.string.viewcontent_user_numberof_Ads);
+                            textView_user_numberofAds.setText(ads);
+                        } else {
+                            String ads = "0 " + getString(R.string.viewcontent_user_numberof_Ads);
+                            textView_user_numberofAds.setText(ads);
+                        }
+                    }
+                    if (dataSnapshot.hasChild("profilePhotoUri")) {
+                        loadPicture(dataSnapshot.child("profilePhotoUri").getValue(String.class));
+                        loaded = true;
+                    }
+                    dismissProgressbar();
+                }else {
+                    //creator doesn't exists or user is offline
+                    dismissProgressbar();
                 }
-                if (dataSnapshot.hasChild("profilePhotoUri")) {
-                    loadPicture(dataSnapshot.child("profilePhotoUri").getValue(String.class));
-                    loaded = true;
-                }
-               dismissProgressbar();
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(),databaseError.getMessage(),Toast.LENGTH_SHORT).show();
                 dismissProgressbar();
             }
         });
@@ -576,15 +641,13 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
         // if no picture check if facebook picture avialable
         if (!loaded && publication.getPrivateContent().getCreatorid().equals(user.getUid())) {
             String facebookUserId = "";
-            // find the Facebook profile and get the user's id
-            for (UserInfo profile : user.getProviderData()) {
-                // check if the provider id matches "facebook.com"
-                if (profile.getProviderId().equals(getString(R.string.facebook_provider_id))) {
-                    facebookUserId = profile.getUid();
+            List<? extends UserInfo> list=user.getProviderData();
+            String providerId=list.get(1).getProviderId();
+
+                if (providerId.equals(getString(R.string.facebook_provider_id))) {
+                    facebookUserId = list.get(1).getUid();
                 }
-            }
-            // construct the URL to the profile picture, with a custom height
-            // alternatively, use '?type=small|medium|large' instead of ?height=
+
             final String photoUrl = "https://graph.facebook.com/" + facebookUserId + "/picture?type=large";
 
             // (optional) use Picasso to download and show to image
@@ -607,11 +670,7 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
                 buttonCall.setEnabled(false);
             }
         }
-        if (!haveNetworkConnection()){
-            Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                    ,Toast.LENGTH_SHORT).show();
-            dismissProgressbar();
-        }
+
     }
 
     private void loadPicture(final String photoUrl) {
@@ -652,13 +711,7 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
     @Override
     protected void onStart() {
         super.onStart();
-        if (!haveNetworkConnection()){
-            Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                    ,Toast.LENGTH_SHORT).show();
-            finish();
-        }else {
-            checkifexist();
-        }
+        checkifexist();
     }
 
     @Override
@@ -681,12 +734,17 @@ public class ViewContentActivity extends AppCompatActivity implements ViewPager.
         switch (view.getId()){
             case R.id.button_viewcontent_sendmail:
 
-                startActivity(new Intent(ViewContentActivity.this,ChatActivity.class)
-                        .putExtra("post_id",publication.getPrivateContent().getUniquefirebaseId())
-                        .putExtra("creator_uid",publication.getPrivateContent().getCreatorid())
-                        .putExtra("key",user.getUid())
-                        .putExtra("is_deal","post")
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                if (publication!=null){
+                    startActivity(new Intent(ViewContentActivity.this,ChatActivity.class)
+                            .putExtra("post_id",publication.getPrivateContent().getUniquefirebaseId())
+                            .putExtra("creator_uid",publication.getPrivateContent().getCreatorid())
+                            .putExtra("key",user.getUid())
+                            .putExtra("is_deal","post")
+                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                }else {
+                    Toast.makeText(getApplicationContext(),getString(R.string.action_not_avialable_or_offline),Toast.LENGTH_SHORT).show();
+                }
+
                 break;
             case R.id.button_viewcontent_call:
                 assert userPublic.getPhoneNumber()!=null;

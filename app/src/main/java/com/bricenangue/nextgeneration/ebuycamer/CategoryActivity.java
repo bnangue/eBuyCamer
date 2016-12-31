@@ -23,6 +23,8 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.ArrayList;
@@ -37,7 +39,6 @@ public class CategoryActivity extends AppCompatActivity implements View.OnClickL
     private Toolbar toolbar,toolbar_bottom;
     private RecyclerAdapterSmallCards adapterSmallCards;
     private FirebaseAuth auth;
-    private String location;
     private ArrayList<String> categories =new ArrayList<>();
     private UserSharedPreference userSharedPreference;
     private FirebaseUser user;
@@ -66,16 +67,9 @@ public class CategoryActivity extends AppCompatActivity implements View.OnClickL
         setContentView(R.layout.activity_category);
 
         userSharedPreference=new UserSharedPreference(this);
-        Bundle extras=getIntent().getExtras();
-        if(extras!=null){
-            location=extras.getString("locationName");
 
-        }
-        if(location==null || location.isEmpty()){
-            location=userSharedPreference.getUserLocation().getName();
-        }
-        if((location==null || location.isEmpty())){
-
+        if(userSharedPreference.getUserLocation().getName().isEmpty()){
+            Toast.makeText(getApplicationContext(),getString(R.string.toast_category_activity_update_location),Toast.LENGTH_SHORT).show();
             //startactivity for result and update location in preference
             startActivityForResult(new Intent(CategoryActivity.this,LocationsActivity.class)
                     .putExtra("user_location",true),LOCATION_INTENT);
@@ -85,17 +79,46 @@ public class CategoryActivity extends AppCompatActivity implements View.OnClickL
                 || userSharedPreference.getLoggedInUser().getUserPublic().getPhoneNumber().getPhoneNumber().isEmpty())){
 
             //ask user to add a phoneNumber
-            changePhoneNumber();
+            if(!userSharedPreference.getUserPhone().getPhoneNumber().isEmpty()){
+                // user update phone number while offline update here if connection
+                if(haveNetworkConnection()){
+                   updatePhoneNumber();
 
+                }
+            }else {
+                if(haveNetworkConnection()){
+                    changePhoneNumber();
+
+                }else {
+                    Toast.makeText(getApplicationContext(),getString(R.string.toast_category_activity_update_phone),Toast.LENGTH_SHORT).show();
+
+                }
+            }
         }
 
         FirebaseMessaging.getInstance().subscribeToTopic(getString(R.string.fcm_notification_city)
         +String.valueOf(userSharedPreference.getUserLocation().getNumberLocation()));
         auth=FirebaseAuth.getInstance();
+        userSharedPreference.setUserDataRefreshed(haveNetworkConnection());
         if(auth==null){
-            startActivity(new Intent(CategoryActivity.this,MainActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-            finish();
+
+            if(userSharedPreference.getUserLoggedIn()){
+                // user offline
+                if(!userSharedPreference.getUserDataRefreshed()){
+                    // user refreshed data on start
+                }
+
+            }else {
+                // user online but auth problem
+                Toast.makeText(this,getString(R.string.problem_while_loading_user_data_auth_null),Toast.LENGTH_LONG).show();
+
+                startActivity(new Intent(CategoryActivity.this,MainActivity.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                Intent.FLAG_ACTIVITY_NEW_TASK));
+                finish();
+            }
+
         }else {
             user=auth.getCurrentUser();
         }
@@ -103,11 +126,9 @@ public class CategoryActivity extends AppCompatActivity implements View.OnClickL
         toolbar=(Toolbar)findViewById(R.id.toolbar_category_activity);
         setSupportActionBar(toolbar);
 
-        if(location!=null && !location.isEmpty()){
-            getSupportActionBar().setTitle(location);
-        }else {
-            getSupportActionBar().setTitle(userSharedPreference.getUserLocation().getName());
-        }
+
+        getSupportActionBar().setTitle(userSharedPreference.getUserLocation().getName());
+
 
 
         toolbar_bottom=(Toolbar)findViewById(R.id.toolbar_bottom_actegory_activity);
@@ -123,9 +144,9 @@ public class CategoryActivity extends AppCompatActivity implements View.OnClickL
         adapterSmallCards=new RecyclerAdapterSmallCards(this, categories, new RecyclerAdapterSmallCards.RecyclerAdaptaterCategoryClickListener() {
             @Override
             public void onItemClick(int position, View v) {
+
                 startActivity(new Intent(CategoryActivity.this,MainPageActivity.class)
                         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        .putExtra("locationName",location).putExtra("category",categories.get(position))
                 .putExtra("position",position));
                 finish();
             }
@@ -146,6 +167,17 @@ public class CategoryActivity extends AppCompatActivity implements View.OnClickL
         img5.setOnClickListener(this);
 
         toolbar_bottom.setTitle(null);
+    }
+
+    private void updatePhoneNumber() {
+        if(auth!=null){
+            DatabaseReference ref= FirebaseDatabase.getInstance().getReference()
+                    .child(ConfigApp.FIREBASE_APP_URL_USERS)
+                    .child(user.getUid())
+                    .child("userPublic")
+                    .child("phoneNumber");
+            ref.setValue(userSharedPreference.getUserPhone());
+        }
     }
 
 

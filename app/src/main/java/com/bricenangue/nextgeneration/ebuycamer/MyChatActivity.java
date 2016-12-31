@@ -60,6 +60,7 @@ public class MyChatActivity extends AppCompatActivity {
     private FirebaseUser user;
     private ProgressDialog progressBar;
     private UserSharedPreference userSharedPreference;
+    private Bitmap decodedByte;
 
     public boolean haveNetworkConnection() {
         boolean haveConnectedWifi = false;
@@ -82,19 +83,29 @@ public class MyChatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_chat);
 
-        if (!haveNetworkConnection()){
-            dismissProgressbar();
-            Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                    ,Toast.LENGTH_SHORT).show();
-        }
-
         userSharedPreference=new UserSharedPreference(this);
         auth=FirebaseAuth.getInstance();
+        userSharedPreference.setUserDataRefreshed(haveNetworkConnection());
         if(auth!=null){
             user=auth.getCurrentUser();
         }else {
-            startActivity(new Intent(MyChatActivity.this,MainActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            if(userSharedPreference.getUserLoggedIn()){
+                // user offline
+                if(!userSharedPreference.getUserDataRefreshed()){
+                    // user refreshed data on start
+
+                }
+
+            }else {
+                // user online but auth problem
+                Toast.makeText(this,getString(R.string.problem_while_loading_user_data_auth_null),Toast.LENGTH_LONG).show();
+
+                startActivity(new Intent(this,MainActivity.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                Intent.FLAG_ACTIVITY_NEW_TASK));
+                finish();
+            }
         }
 
 
@@ -118,6 +129,7 @@ public class MyChatActivity extends AppCompatActivity {
         progressBar = new ProgressDialog(this);
         progressBar.setCancelable(false);
         progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressBar.setTitle(getString(R.string.progress_dialog_loading));
         progressBar.show();
     }
 
@@ -127,11 +139,26 @@ public class MyChatActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (decodedByte!=null){
+            decodedByte.recycle();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (decodedByte!=null){
+            decodedByte=null;
+        }
+    }
 
     private void fetchMyPost() {
         showProgressbar();
         final Query reference= root.limitToLast(100);
-        //reference.keepSynced(true);
+        reference.keepSynced(true);
         final FirebaseRecyclerAdapter<ChatLoad,MyChatViewHolder> adapter=
                 new FirebaseRecyclerAdapter<ChatLoad,MyChatViewHolder>(
                         ChatLoad.class,
@@ -169,15 +196,21 @@ public class MyChatActivity extends AppCompatActivity {
                             }
 
 
-                            viewHolder.titel.setText(model.getPost_title());
+                            if(model.getPost_title()==null){
+                                viewHolder.titel.setText(getString(R.string.new_conversation_a));
+                            }else {
+                                viewHolder.titel.setText(model.getPost_title());
+                            }
+
 
 
 
                             if(model.getPost_first_image()!=null){
                                 byte[] decodedString = Base64.decode(model.getPost_first_image(), Base64.DEFAULT);
-                                Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+                                decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
 
                                 viewHolder.postPicture.setImageBitmap(decodedByte);
+
 
                             }
 
@@ -187,17 +220,12 @@ public class MyChatActivity extends AppCompatActivity {
                             viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
-                                    if (!haveNetworkConnection()){
-                                        Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                                                ,Toast.LENGTH_SHORT).show();
-                                    }else {
-                                        startActivity(new Intent(MyChatActivity.this,ChatActivity.class)
-                                                .putExtra("post_id",model.getPath_post_id())
-                                                .putExtra("creator_uid",model.getPath_creator_uid())
-                                                .putExtra("key",model.getPath_buyer())
-                                                .putExtra("is_deal",model.getIs_deal())
-                                                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
-                                    }
+                                    startActivity(new Intent(MyChatActivity.this,ChatActivity.class)
+                                            .putExtra("post_id",model.getPath_post_id())
+                                            .putExtra("creator_uid",model.getPath_creator_uid())
+                                            .putExtra("key",model.getPath_buyer())
+                                            .putExtra("is_deal",model.getIs_deal())
+                                            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
 
                                 }
                             });
@@ -226,7 +254,7 @@ public class MyChatActivity extends AppCompatActivity {
                                 }
                             });
                         }else {
-                            viewHolder.lastmassage.setText(getString(R.string.new_conversation));
+                            viewHolder.lastmassage.setText(getString(R.string.new_conversation_a));
                         }
 
                     }
@@ -238,7 +266,10 @@ public class MyChatActivity extends AppCompatActivity {
         if(adapter.getItemCount()==0){
             dismissProgressbar();
         }
-
+        if (!haveNetworkConnection()){
+            dismissProgressbar();
+            Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
+        }
     }
 
 
@@ -359,7 +390,15 @@ public class MyChatActivity extends AppCompatActivity {
                     case R.id.menu_delete_chat:
 
 
-                        deleteChat(creator_uid, post_id,foreign_uid);
+                        if (!haveNetworkConnection()){
+                            Toast.makeText(getApplicationContext(),getString(R.string.action_not_avialable_or_offline),Toast.LENGTH_SHORT).show();
+
+                            Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
+                                    ,Toast.LENGTH_SHORT).show();
+                        }else {
+                            deleteChat(creator_uid, post_id,foreign_uid);
+                        }
+
                         return true;
                     default:
                         return false;

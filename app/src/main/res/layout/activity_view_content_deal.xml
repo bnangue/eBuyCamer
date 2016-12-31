@@ -288,6 +288,8 @@
                             android:drawableLeft="@drawable/ic_delete_black_18dp"
                             style="@style/Base.Widget.AppCompat.Button.Borderless"
                             android:onClick="ButtonRemoveMyOfferClicked"
+                           android:layout_marginRight="5dp"
+                            android:layout_marginEnd="5dp"
                             android:visibility="gone"/>
                     </LinearLayout>
 

@@ -85,6 +85,8 @@ public class ViewDealsActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        userSharedPreference=new UserSharedPreference(this);
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,13 +101,28 @@ public class ViewDealsActivity extends AppCompatActivity {
 
 
         getSupportActionBar().setTitle(getString(R.string.all_deals));
-        userSharedPreference=new UserSharedPreference(this);
+        userSharedPreference.setUserDataRefreshed(haveNetworkConnection());
         auth=FirebaseAuth.getInstance();
         if(auth!=null){
             user=auth.getCurrentUser();
         }else {
-            startActivity(new Intent(ViewDealsActivity.this,MainActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+            if(userSharedPreference.getUserLoggedIn()){
+                // user offline
+                if(!userSharedPreference.getUserDataRefreshed()){
+                    // user refreshed data on start
+
+                }
+
+            }else {
+                // user online but auth problem
+                Toast.makeText(this,getString(R.string.problem_while_loading_user_data_auth_null),Toast.LENGTH_LONG).show();
+
+                startActivity(new Intent(this,MainActivity.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                Intent.FLAG_ACTIVITY_NEW_TASK));
+                finish();
+            }
         }
         root= FirebaseDatabase.getInstance().getReference().child(ConfigApp.FIREBASE_APP_URL_USERS_DEAL);
         recyclerView=(RecyclerView)findViewById(R.id.horizontal_recycler_view_create_post_deal);
@@ -115,11 +132,6 @@ public class ViewDealsActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
 
-        if (!haveNetworkConnection()){
-            dismissProgressbar();
-            Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                    ,Toast.LENGTH_SHORT).show();
-        }
     }
 
 
@@ -136,13 +148,7 @@ public class ViewDealsActivity extends AppCompatActivity {
         switch (item.getItemId()){
             case R.id.action_refresh_viewdeal :
 
-                if (!haveNetworkConnection()){
-                    Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                            ,Toast.LENGTH_SHORT).show();
-                }else {
                     fetchDeals();
-                }
-
 
                 return true;
 
@@ -174,18 +180,23 @@ public class ViewDealsActivity extends AppCompatActivity {
         showProgressbar();
         final Query reference= FirebaseDatabase.getInstance().getReference()
                 .child(ConfigApp.FIREBASE_APP_URL_USERS_DEAL);
-       // reference.keepSynced(true);
-        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+        reference.keepSynced(true);
+        reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.hasChildren()){
                     dismissProgressbar();
+                    if (!haveNetworkConnection()){
+                        Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
+                        reference.removeEventListener(this);
+                    }
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                reference.removeEventListener(this);
+                Toast.makeText(getApplicationContext(),databaseError.getMessage(),Toast.LENGTH_SHORT).show();
             }
         });
         FirebaseRecyclerAdapter<Deals,DealViewHolder> adapter=
@@ -258,7 +269,7 @@ public class ViewDealsActivity extends AppCompatActivity {
                                     if (!haveNetworkConnection()){
                                         Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
                                                 ,Toast.LENGTH_SHORT).show();
-                                    }else {
+                                    }
 
                                         if(model.getPrivateContent().getCreatorid().equals(user.getUid())){
                                             startActivity(new Intent(ViewDealsActivity.this,SingleDealActivityActivity.class)
@@ -288,7 +299,7 @@ public class ViewDealsActivity extends AppCompatActivity {
 
                                         }
 
-                                    }
+
 
                                 }
                             });
@@ -298,7 +309,10 @@ public class ViewDealsActivity extends AppCompatActivity {
 
         recyclerView.setAdapter(adapter);
         adapter.notifyDataSetChanged();
-
+        if (!haveNetworkConnection()){
+            dismissProgressbar();
+            Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
+        }
 
 
     }

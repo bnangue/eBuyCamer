@@ -299,5 +299,17 @@
     <string name="invitation_message">"Salut, essaye cette nouvelle app "</string>
     <string name="invitation_title">Partagez Bizness Camer avec des amis</string>
     <string name="check_box_create_post_hint_is_for_free">Gratuit</string>
+    <string name="Error_while_updating_user_profile_information">Erreur pendant l\'actualisation de vos données</string>
+    <string name="action_not_avialable_or_offline">Cette action n\'est disponible pour l\'intant. Actualisez la page ou essayez plus tard</string>
+    <string name="change_have_been_made_localy">Changement des données locales. Une actualisation sera faite dès qu\'une connexion internet sera détectée</string>
+    <string name="connection_to_server_not_aviable_cannot_delete_deal">Vous ne pouvez pas supprimer cet article</string>
+    <string name="new_conversation_a">Nouvelle Conversation</string>
+    <string name="no_internet_app_not_properly_work">Certaines fonctions peuvent ne pas fonctionner correctement</string>
+    <string name="problem_while_loading_user_data">Un problème est survenu lors du chargement des données. Assurez vous que vous avez une connexion internet stable puis essayez de nouveau</string>
+    <string name="problem_while_loading_user_data_auth_null">Vous avez déconnecté votre dernière session ou vous n\'êtes pas encore enrégistré</string>
+    <string name="problem_while_loading_user_data_not_identify">Nous n\'arrivons pas à vous identifier. Veillez contacter notre équipe de support.</string>
+    <string name="problem_while_loading_user_data_verifaction_email_resent">Nous vous avons envoyé un e-mail de vérification à l\'adresse</string>
+    <string name="toast_category_activity_update_location">Mettez à jour votre localité pour optimiser votre expérience</string>
+    <string name="toast_category_activity_update_phone">Ajoutez un numéro de téléphone pour permettre a d\'autres utilisateurs de vous contacter facilement</string>
 
 </resources>

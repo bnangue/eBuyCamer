@@ -135,10 +135,25 @@ public class CreateAndModifyPublicationActivity extends AppCompatActivity {
         }
         userSharedPreference=new UserSharedPreference(this);
         auth=FirebaseAuth.getInstance();
-        if(auth.getCurrentUser()==null){
-            startActivity(new Intent(CreateAndModifyPublicationActivity.this
-                    ,MainActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+        userSharedPreference.setUserDataRefreshed(haveNetworkConnection());
+        if(auth==null){
+            if(userSharedPreference.getUserLoggedIn()){
+                // user offline
+                if(!userSharedPreference.getUserDataRefreshed()){
+                    // user refreshed data on start
+
+                }
+
+            }else {
+                // user online but auth problem
+                Toast.makeText(this,getString(R.string.problem_while_loading_user_data_auth_null),Toast.LENGTH_LONG).show();
+
+                startActivity(new Intent(this,MainActivity.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                Intent.FLAG_ACTIVITY_NEW_TASK));
+                finish();
+            }
         }
 
         //to save the path in one language (english)
@@ -201,16 +216,10 @@ public class CreateAndModifyPublicationActivity extends AppCompatActivity {
             }
         });
 
-
-
-        if (!haveNetworkConnection()){
-            Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                    ,Toast.LENGTH_SHORT).show();
-        }else {
-            if(postToeditId!=null && !postToeditId.isEmpty()){
-                populate();
-            }
+        if(postToeditId!=null && !postToeditId.isEmpty()){
+            populate();
         }
+
     }
 
     private void populate() {
@@ -221,51 +230,64 @@ public class CreateAndModifyPublicationActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 PrivateContent post = dataSnapshot.getValue(PrivateContent.class);
-                if(dataSnapshot.hasChild("description")){
-                    editTextDescription.setText(post.getDescription());
-                }
+                if (post!=null){
+                    if(dataSnapshot.hasChild("description")){
+                        editTextDescription.setText(post.getDescription());
+                    }
 
-               editTextPrice.setText(post.getPrice());
-                editTextTitle.setText(post.getTitle());
+                    editTextPrice.setText(post.getPrice());
+                    editTextTitle.setText(post.getTitle());
 
-                if(dataSnapshot.hasChild("isNegotiable")){
+                    if(dataSnapshot.hasChild("isNegotiable")){
+                        checkBoxIsNegotiable.setChecked(post.isNegotiable());
+                    }
+
+                    if (post.getPrice().equals("0")){
+                        checkBoxForFree.setChecked(true);
+
+                    }
+                    if(dataSnapshot.hasChild("publictionPhotos")){
+                        for(PublicationPhotos uri : post.getPublictionPhotos()){
+                            recyclerViewAdapter.addUri(Uri.parse(uri.getUri()));
+                            //uris.add(Uri.parse(uri.getUri()));
+                            //towWaysViewAdapter.notifyDataSetChanged();
+                            if (recyclerViewAdapter!=null && recyclerViewAdapter.getItemCount()>=5){
+                                imageViewAddNewImage.setEnabled(false);
+
+                            }else {
+                                imageViewAddNewImage.setEnabled(true);
+                            }
+
+                        }
+                    }
+
+                    categoryFromPost=categoriesArray[post.getCategorie().getCatNumber()];
+                    int positionSpinner=post.getCategorie().getCatNumber();
+                    spinnerCategory.setSelection(positionSpinner+1);
+                    location=post.getLocation().getName();
+                    spinnerCurrency.setSelection(getCurrencyPosition(post.getCurrency()));
+                    spinnerCategory.setEnabled(false);
+                    spinnerCurrency.setEnabled(false);
                     checkBoxIsNegotiable.setChecked(post.isNegotiable());
+                    postToedit=post;
+                }else {
+                    if (!haveNetworkConnection()){
+
+                        Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
+                        finish();
+                    }else {
+                        Toast.makeText(getApplicationContext(), getString(R.string.string_toast_viewcontent_Post_deleted)
+                                , Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
                 }
-
-                if (post.getPrice().equals("0")){
-                    checkBoxForFree.setChecked(true);
-
-                }
-               if(dataSnapshot.hasChild("publictionPhotos")){
-                   for(PublicationPhotos uri : post.getPublictionPhotos()){
-                       recyclerViewAdapter.addUri(Uri.parse(uri.getUri()));
-                       //uris.add(Uri.parse(uri.getUri()));
-                       //towWaysViewAdapter.notifyDataSetChanged();
-                       if (recyclerViewAdapter!=null && recyclerViewAdapter.getItemCount()>=5){
-                           imageViewAddNewImage.setEnabled(false);
-
-                       }else {
-                           imageViewAddNewImage.setEnabled(true);
-                       }
-
-                   }
-               }
-
-                categoryFromPost=categoriesArray[post.getCategorie().getCatNumber()];
-                int positionSpinner=post.getCategorie().getCatNumber();
-                spinnerCategory.setSelection(positionSpinner+1);
-                location=post.getLocation().getName();
-                spinnerCurrency.setSelection(getCurrencyPosition(post.getCurrency()));
-                spinnerCategory.setEnabled(false);
-                spinnerCurrency.setEnabled(false);
-                checkBoxIsNegotiable.setChecked(post.isNegotiable());
-                postToedit=post;
 
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Toast.makeText(getApplicationContext(), databaseError.getMessage()
+                        , Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -283,13 +305,7 @@ public class CreateAndModifyPublicationActivity extends AppCompatActivity {
 
             @Override
             public void ondelteCLick(int position) {
-
-                if (!haveNetworkConnection()){
-                    Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                            ,Toast.LENGTH_SHORT).show();
-                }else {
-                    delete(position);
-                }
+                delete(position);
             }
         });
 
@@ -1087,14 +1103,9 @@ public class CreateAndModifyPublicationActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void reponse) {
             super.onPostExecute(reponse);
-            suscribe();
         }
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            unsuscribe();
-        }
+
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -1148,12 +1159,4 @@ public class CreateAndModifyPublicationActivity extends AppCompatActivity {
         }
     }
 
-    private void suscribe(){
-        FirebaseMessaging.getInstance().subscribeToTopic(getString(R.string.fcm_notification_city)
-                +String.valueOf(userSharedPreference.getUserLocation().getNumberLocation()));
-    }
-    private void unsuscribe(){
-        FirebaseMessaging.getInstance().unsubscribeFromTopic(getString(R.string.fcm_notification_city)
-                +String.valueOf(userSharedPreference.getUserLocation().getNumberLocation()));
-    }
 }

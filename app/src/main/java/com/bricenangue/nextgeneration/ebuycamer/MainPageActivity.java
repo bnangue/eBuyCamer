@@ -66,7 +66,7 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
     private DatabaseReference root;
     private LinearLayoutManager layoutManager;
     private ProgressDialog progressBar;
-    private String locationName,category;
+    private String locationName;
     private UserSharedPreference userSharedPreference;
     private FirebaseUser user;
     private ArrayList<Publication> data=new ArrayList<>();
@@ -76,6 +76,8 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
     private int positionSpinner=0;
 
     private String [] categoriesArray;
+    private static final int LOCATION_INTENT=3;
+
 
 
 
@@ -106,31 +108,48 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
         userSharedPreference=new UserSharedPreference(this);
         Bundle extras=getIntent().getExtras();
 
-        if(extras!=null && extras.containsKey("category")){
-
-            category=extras.getString("category");
+        if(extras!=null){
             if(extras.containsKey("position")){
                 positionSpinner=extras.getInt("position");
             }
 
         }
+        if (!userSharedPreference.getUserLocation().getName().isEmpty()){
+            locationName=userSharedPreference.getUserLocation().getName();
+        }else {
+            startActivityForResult(new Intent(MainPageActivity.this,LocationsActivity.class)
+                    .putExtra("user_location",true),LOCATION_INTENT);
+        }
 
-        locationName=userSharedPreference.getUserLocation().getName();
 
         categoriesArray=getResources().getStringArray(R.array.categories_arrays_create_mainpage);
         auth=FirebaseAuth.getInstance();
         toolbar=(Toolbar)findViewById(R.id.toolbar);
 
-
+        userSharedPreference.setUserDataRefreshed(haveNetworkConnection());
 
         if(auth!=null){
 
             user=auth.getCurrentUser();
 
         }else {
-            startActivity(new Intent(MainPageActivity.this,MainActivity.class)
-                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
-            finish();
+            if(userSharedPreference.getUserLoggedIn()){
+                // user offline
+                if(!userSharedPreference.getUserDataRefreshed()){
+                    // user refreshed data on start
+
+                }
+
+            }else {
+                // user online but auth problem
+                Toast.makeText(this,getString(R.string.problem_while_loading_user_data_auth_null),Toast.LENGTH_LONG).show();
+
+                startActivity(new Intent(MainPageActivity.this,MainActivity.class)
+                        .setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP |
+                                Intent.FLAG_ACTIVITY_CLEAR_TASK |
+                                Intent.FLAG_ACTIVITY_NEW_TASK));
+                finish();
+            }
 
         }
         if (categoriesArray[positionSpinner].equals("All Publications")) {
@@ -191,7 +210,6 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
             @Override
             public void onItemClick(int position, View v) {
                 Publication model=data.get(position);
-                if(haveNetworkConnection()){
                     startActivity(new Intent(MainPageActivity.this,ViewContentActivity.class)
                             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                             .putExtra("post",model.getPrivateContent().getUniquefirebaseId())
@@ -205,12 +223,6 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
                     updateViewer(root.child(model.getPrivateContent().getUniquefirebaseId())
                                     .child("publicContent"),
                             model.getPrivateContent().getUniquefirebaseId(),model.getPrivateContent().getCreatorid());
-                }else {
-                    Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                            ,Toast.LENGTH_SHORT).show();
-                }
-
-
             }
 
             @Override
@@ -218,9 +230,7 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
 
             }
         };
-        if (!haveNetworkConnection()){
-            procideOffline();
-        }
+
     }
 
     private void procideOffline() {
@@ -342,6 +352,7 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
         progressBar = new ProgressDialog(this);
         progressBar.setCancelable(false);
         progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressBar.setMessage(getString(R.string.progress_dialog_loading));
         progressBar.show();
     }
 
@@ -354,7 +365,7 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
     private void loadData(ArrayList<Publication> loadedData){
         adapterPosts=new RecyclerViewAdapterPosts(this,loadedData,adaptaterPostClickListener);
         recyclerView.setAdapter(adapterPosts);
-       dismissProgressbar();
+        dismissProgressbar();
         adapterPosts.notifyDataSetChanged();
 
     }
@@ -371,17 +382,19 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
             reference= FirebaseDatabase.getInstance().getReference()
                     .child(ConfigApp.FIREBASE_APP_URL_USERS_POSTS_ALL_CITY)
                     .child(getString(R.string.fcm_notification_city)+String.valueOf(userSharedPreference.getUserLocation().getNumberLocation()));
+            reference.keepSynced(true);
 
         }else {
             reference= FirebaseDatabase.getInstance().getReference()
                     .child(ConfigApp.FIREBASE_APP_URL_REGIONS)
                     .child(locationName)
                     .child(categoriesArray[position]);
+            reference.keepSynced(true);
 
         }
 
-       // reference.keepSynced(true);
-        reference.addListenerForSingleValueEvent(new ValueEventListener() {
+
+        reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if(dataSnapshot.hasChildren()){
@@ -412,14 +425,10 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
                 dismissProgressbar();
             }
         });
-
-        if(!haveNetworkConnection()){
+        if (!haveNetworkConnection()){
             dismissProgressbar();
-            Toast.makeText(getApplicationContext(),getString(R.string.connection_to_server_not_aviable)
-                    ,Toast.LENGTH_SHORT).show();
-
+            Toast.makeText(getApplicationContext(),getString(R.string.alertDialog_no_internet_connection),Toast.LENGTH_SHORT).show();
         }
-
     }
 
     @Override
@@ -447,7 +456,6 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-        category=spinnerToolbar.getSelectedItem().toString();
         fetchPost(i);
     }
 
@@ -506,9 +514,7 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
                 // Log.d(TAG, "postTransaction:onComplete:" + databaseError);
             }
         });
-        if(!haveNetworkConnection()){
-            procideOffline();
-        }
+
     }
 
     @Override
@@ -590,6 +596,20 @@ public class MainPageActivity extends AppCompatActivity implements View.OnClickL
             }
 
             return view;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == LOCATION_INTENT && resultCode==RESULT_OK){
+            String location=data.getExtras().getString("user_location");
+            int  position=data.getExtras().getInt("position_location");
+            getSupportActionBar().setTitle(location);
+            UserSharedPreference preference =new UserSharedPreference(getApplicationContext());
+            preference.storeUserLocation(location,position);
+
         }
     }
 }

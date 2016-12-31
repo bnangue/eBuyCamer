@@ -83,6 +83,7 @@ public class UserSharedPreference {
             spEditor.putString("phonenumber",user.getPhoneNumber().getPhoneNumber());
         }
         spEditor.putString("fullname",user.getName());
+        spEditor.putString("user_uid",user.getUniquefirebasebId());
         spEditor.putString("pictureuri",user.getProfilePhotoUri());
         spEditor.apply();
     }
@@ -93,6 +94,7 @@ public class UserSharedPreference {
         String code=userLocalDataBase.getString("code","");
         String fullname=userLocalDataBase.getString("fullname", "");
         String pictureuri=userLocalDataBase.getString("pictureuri","");
+        String user_uid=userLocalDataBase.getString("user_uid","");
 
         User user=new User();
         UserPublic userPublic=new UserPublic();
@@ -100,7 +102,9 @@ public class UserSharedPreference {
         userPublic.setPhoneNumber(new PhoneNumber(code,phonenumber));
         userPublic.setName(fullname);
         userPublic.setProfilePhotoUri(pictureuri);
+        userPublic.setUniquefirebasebId(user_uid);
         user.setUserPublic(userPublic);
+
 
         return user;
     }
@@ -122,4 +126,37 @@ public class UserSharedPreference {
     public boolean getUserLoggedIn(){
         return userLocalDataBase.getBoolean("loggedIn", false);
     }
+
+
+    // if logged in and data not refresh work offline
+    public void setUserDataRefreshed(boolean refreshed){
+        SharedPreferences.Editor spEditor=userLocalDataBase.edit();
+        spEditor.putBoolean("refresh_user_data", refreshed);
+        spEditor.apply();
+
+    }
+
+    public boolean getUserDataRefreshed(){
+        return userLocalDataBase.getBoolean("refresh_user_data", false);
+    }
+
+
+    public PhoneNumber getUserPhone(){
+        String phonenumber=userLocalDataBase.getString("phonenumber","");
+        String code=userLocalDataBase.getString("code","");
+
+        return new PhoneNumber(code,phonenumber);
+
+    }
+
+
+    public void setUserPhone(PhoneNumber phone){
+        SharedPreferences.Editor spEditor=userLocalDataBase.edit();
+
+        spEditor.putString("code",phone.getCode());
+        spEditor.putString("phonenumber",phone.getPhoneNumber());
+
+        spEditor.apply();
+    }
+
 }
